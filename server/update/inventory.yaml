@@ -1,9 +1,10 @@
 ---
-bare_metal:
+all:
   vars:
     ansible_become: true
     ansible_become_method: sudo
     ansible_python_interpreter: /usr/bin/python3
+bare_metal:
   hosts:
     zimacube:
       ansible_host: 10.1.1.11
@@ -14,30 +15,22 @@ bare_metal:
     node-03:
       ansible_host: 10.1.1.14
 virtual_machines:
-  vars:
-    ansible_become: true
-    ansible_become_method: sudo
-    ansible_python_interpreter: /usr/bin/python3
   hosts:
     technitium:
       ansible_host: 10.1.1.15
     ubuntu:
       ansible_host: 10.1.1.16
-hashilab:
-  vars:
-    ansible_become: true
-    ansible_become_method: sudo
-    ansible_python_interpreter: /usr/bin/python3
-  hosts:
-    server-01:
-      ansible_host: 10.1.1.21
-    server-02:
-      ansible_host: 10.1.1.22
-    server-03:
-      ansible_host: 10.1.1.23
-    client-01:
-      ansible_host: 10.1.1.31
-    client-02:
-      ansible_host: 10.1.1.32
-    client-03:
-      ansible_host: 10.1.1.33
+#hashilab:
+#  hosts:
+#    server-01:
+#      ansible_host: 10.1.1.21
+#    server-02:
+#      ansible_host: 10.1.1.22
+#    server-03:
+#      ansible_host: 10.1.1.23
+#    client-01:
+#      ansible_host: 10.1.1.31
+#    client-02:
+#      ansible_host: 10.1.1.32
+#    client-03:
+#      ansible_host: 10.1.1.33
