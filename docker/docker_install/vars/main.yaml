@@ -1,5 +1,5 @@
 ---
-distribution: debian
+distribution: ubuntu
 docker_archs:
   x86_64:   amd64
   amd64:    amd64
@@ -10,4 +10,4 @@ docker_distribution_release: "{{ ansible_facts.distribution_release }}"
 USER: troy
 SUBNET: 10.66.42.0/24
 GATEWAY: 10.66.42.1
-NETWOTK: ansible
+NETWORK: ansible
