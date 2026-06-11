@@ -202,7 +202,7 @@
 # =============================================================================
 - name: Create custom SSHD config
   ansible.builtin.copy:
-    dest: /etc/ssh/sshd_config.d/60-local.conf
+    dest: /etc/ssh/sshd_config.d/00-hardening.conf
     mode: '0600'
     content: |
       PermitRootLogin no
@@ -216,17 +216,14 @@
 - name: Install packages
   ansible.builtin.apt:
     name:
-      - bat
       - console-setup
       - curl
-      - duf
-      - fzf
       - git
       - gpg
-      - htop
       - systemd-timesyncd
       - tree
       - vim
+      - wget
       - zsh
     state: present
 
@@ -346,7 +343,7 @@
 
 - name: Configure systemd-resolved
   ansible.builtin.copy:
-    dest: /etc/systemd/resolved.conf.d/resolved.conf
+    dest: /etc/systemd/resolved.conf.d/99-local.conf
     mode: '0644'
     content: |
       [Resolve]
@@ -375,70 +372,6 @@
     dest: /etc/resolv.conf
     state: link
     force: true
-
-# =============================================================================
-# systemd-networkd
-# =============================================================================
-- name: Ensure /etc/network directory exists
-  ansible.builtin.file:
-    path: /etc/network
-    state: directory
-    mode: '0755'
-  when: not is_lxc
-
-- name: Stub out /etc/network/interfaces
-  ansible.builtin.copy:
-    dest: /etc/network/interfaces
-    mode: '0644'
-    content: |
-      # This system is configured to use systemd-networkd, see /etc/systemd/network/
-  when: not is_lxc
-
-- name: Configure loopback network
-  ansible.builtin.copy:
-    dest: /etc/systemd/network/00-lo.network
-    owner: root
-    group: systemd-network
-    mode: '0640'
-    content: |
-      [Match]
-      Name=lo
-
-      [Network]
-      Address=127.0.0.1/8
-      LinkLocalAddressing=no
-  when: not is_lxc
-
-- name: Configure primary network interface
-  ansible.builtin.copy:
-    dest: /etc/systemd/network/10-{{ ansible_default_ipv4.interface }}.network
-    owner: root
-    group: systemd-network
-    mode: '0640'
-    content: |
-      [Match]
-      Name={{ ansible_default_ipv4.interface }}
-
-      [Network]
-      DHCP=ipv4
-      IPv6AcceptRA=no
-      LinkLocalAddressing=ipv4
-
-      [Link]
-      RequiredForOnline=yes
-  when: not is_lxc
-
-- name: Enable systemd-networkd
-  ansible.builtin.service:
-    name: systemd-networkd
-    enabled: true
-  when: not is_lxc
-
-- name: Remove ifupdown
-  ansible.builtin.apt:
-    name: ifupdown
-    state: absent
-  when: not is_lxc
 
 # =============================================================================
 # systemd-journald
@@ -472,56 +405,6 @@
   ansible.builtin.service:
     name: systemd-journald
     enabled: true
-
-# =============================================================================
-# systemd-timesyncd
-# =============================================================================
-- name: Create systemd-timesyncd config directory
-  ansible.builtin.file:
-    path: /etc/systemd/timesyncd.conf.d
-    state: directory
-    mode: '0755'
-
-- name: Configure systemd-timesyncd
-  ansible.builtin.copy:
-    dest: /etc/systemd/timesyncd.conf.d/timesyncd.conf
-    mode: '0644'
-    content: |
-      [Time]
-      NTP=0.se.pool.ntp.org 1.se.pool.ntp.org 2.se.pool.ntp.org
-      FallbackNTP=0.debian.pool.ntp.org 1.debian.pool.ntp.org
-      RootDistanceMaxSec=5
-      PollIntervalMinSec=32
-      PollIntervalMaxSec=2048
-      ConnectionRetrySec=30
-      SaveIntervalSec=60
-
-- name: Enable systemd-timesyncd
-  ansible.builtin.service:
-    name: systemd-timesyncd
-    enabled: true
-
-# =============================================================================
-# systemd-sleep
-# =============================================================================
-- name: Create systemd-sleep config directory
-  ansible.builtin.file:
-    path: /etc/systemd/sleep.conf.d
-    state: directory
-    mode: '0755'
-  when: not is_lxc
-
-- name: Configure systemd-sleep
-  ansible.builtin.copy:
-    dest: /etc/systemd/sleep.conf.d/sleep.conf
-    mode: '0644'
-    content: |
-      [Sleep]
-      AllowSuspend=no
-      AllowHibernation=no
-      AllowSuspendThenHibernate=no
-      AllowHybridSleep=no
-  when: not is_lxc
 
 # =============================================================================
 # Kernel parameters
@@ -588,53 +471,6 @@
     path: /etc/default/console-setup
     regexp: '^FONTSIZE='
     line: 'FONTSIZE="8x16"'
-
-# =============================================================================
-# Root account
-# =============================================================================
-- name: Create root XDG directories
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: '0700'
-  loop:
-    - /root/.cache
-    - /root/.local/share
-    - /root/.local/state
-
-- name: Configure root .bashrc
-  ansible.builtin.blockinfile:
-    path: /root/.bashrc
-    create: true
-    block: |
-      export PS1="\[\e[38;5;9m\]\u\[\e[38;5;15m\]@\[\e[38;5;9m\]\h\[\e[38;5;15m\]:\w \[\033[0m\]# "
-
-      export LS_OPTIONS='--color=auto'
-      alias ls='ls --color=auto'
-
-      alias rm='rm -i'
-      alias cp='cp -i'
-      alias mv='mv -i'
-      alias ll='ls -aFhl'
-      alias cls='clear'
-      alias ..='cd ..'
-
-- name: Configure root .profile
-  ansible.builtin.blockinfile:
-    path: /root/.profile
-    create: true
-    block: |
-      export XDG_CACHE_HOME=/root/.cache
-      export XDG_CONFIG_HOME=/root/.config
-      export XDG_DATA_HOME=/root/.local/share
-      export XDG_STATE_HOME=/root/.local/state
-
-- name: Seed root bash history
-  ansible.builtin.lineinfile:
-    path: /root/.bash_history
-    line: "sed -i '/options/ { /[[:space:]]quiet$/! s/$/ quiet/ }' /boot/efi/loader/entries/*.conf"
-    create: true
-  when: efi_loader_dir.stat.exists
 
 # =============================================================================
 # Systemd-boot
