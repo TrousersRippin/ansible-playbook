@@ -8,14 +8,12 @@ bare_metal:
   hosts:
     zimacube:
       ansible_host: 10.1.1.11
-    node-01:
-      ansible_host: 10.1.1.12
-    node-02:
+    beelink:
       ansible_host: 10.1.1.13
-    node-03:
-      ansible_host: 10.1.1.14
 virtual_machines:
   hosts:
+    ubuntu:
+      ansible_host: 10.1.1.14
     technitium:
       ansible_host: 10.1.1.15
     minecraft:

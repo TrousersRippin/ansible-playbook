@@ -220,7 +220,6 @@
       - curl
       - git
       - gpg
-      - systemd-timesyncd
       - tree
       - vim
       - wget
