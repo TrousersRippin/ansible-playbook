@@ -6,17 +6,11 @@ all:
     ansible_python_interpreter: /usr/bin/python3
 bare_metal:
   hosts:
-    zimacube:
-      ansible_host: 10.1.1.11
     beelink:
-      ansible_host: 10.1.1.13
+      ansible_host: 10.1.1.11
 virtual_machines:
   hosts:
     ubuntu:
-      ansible_host: 10.1.1.14
-    technitium:
-      ansible_host: 10.1.1.15
-    minecraft:
-      ansible_host: 10.1.1.16
+      ansible_host: 10.1.1.13
     debian:
-      ansible_host: 10.1.1.17
+      ansible_host: 10.1.1.14
