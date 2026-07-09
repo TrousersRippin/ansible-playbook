@@ -1,3 +1,4 @@
+---
 web:
   port: 8899
 
@@ -6,7 +7,7 @@ metrics: true
 storage:
   type: memory
 
-#alerting:
+# alerting:
 
 endpoints:
   - name: The Noisy Keyboard

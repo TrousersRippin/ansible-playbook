@@ -1,3 +1,4 @@
+---
 - name: Get distribution release fact
   ansible.builtin.setup:
     gather_subset:

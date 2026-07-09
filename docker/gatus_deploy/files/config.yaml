@@ -1,5 +1,4 @@
-#alerting:
-
+---
 endpoints:
   - name: The Noisy Keyboard
     group: websites

@@ -83,7 +83,7 @@
 
 - name: Check if Redis is running
   ansible.builtin.fail:
-    msg: "Redis container is not running. Cannot proceed with {{ APP }} deployment."
+    msg: "Redis container not running. Cannot proceed with deployment."
   when: not redis_info.exists or redis_info.container.State.Status != "running"
 
 - name: Start container

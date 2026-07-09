@@ -51,7 +51,7 @@
 
 - name: Check if PostgreSQL is healthy
   ansible.builtin.fail:
-    msg: "PostgreSQL container is not healthy. Cannot proceed with {{ APP }} deployment."
+    msg: "PostgreSQL container not healthy. Cannot proceed with deployment."
   when: not postgres_info.exists or postgres_info.container.State.Health.Status != "healthy"
 
 - name: Start container

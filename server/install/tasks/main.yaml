@@ -132,7 +132,7 @@
     append: true
     password: "{{ hashed_password }}"
 
-#- name: Configure sudo privileges
+# - name: Configure sudo privileges
 #  ansible.builtin.copy:
 #    dest: /etc/sudoers.d/admin
 #    mode: '0440'
@@ -231,7 +231,7 @@
     name:
       - fail2ban
       - unattended-upgrades
-      #- ufw
+      # - ufw
     state: present
 
 # =============================================================================
@@ -261,13 +261,13 @@
 # =============================================================================
 # UFW
 # =============================================================================
-#- name: Allow OpenSSH through firewall
+# - name: Allow OpenSSH through firewall
 #  ansible.builtin.ufw:
 #    rule: allow
 #    name: OpenSSH
 #  when: not is_lxc
 #
-#- name: Enable UFW with default deny policy
+# - name: Enable UFW with default deny policy
 #  ansible.builtin.ufw:
 #    state: enabled
 #    policy: deny

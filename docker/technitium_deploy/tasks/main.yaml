@@ -39,14 +39,14 @@
     path: /etc/systemd/resolved.conf
     regexp: '^#?DNSStubListener='
     line: 'DNSStubListener=no'
-    create: yes
-    backup: yes
+    create: true
+    backup: true
 
 - name: Restart systemd-resolved
   ansible.builtin.systemd:
     name: systemd-resolved
     state: restarted
-    enabled: yes
+    enabled: true
 
 - name: Check if image exists
   community.docker.docker_image:
