@@ -30,7 +30,7 @@
     mode: '0644'
     content: |
       127.0.0.1   localhost
-      127.0.1.1   {{ inventory_hostname }}   {{ HOST }}
+      127.0.1.1   {{ inventory_hostname }}   {{ inventory_hostname }}
 
 # =============================================================================
 # Package manager
@@ -191,7 +191,7 @@
   ansible.builtin.openssh_keypair:
     path: /home/{{ NEW_USER_NAME }}/.ssh/id_ed25519
     type: ed25519
-    comment: "{{ HOST }}"
+    comment: "{{ inventory_hostname }}"
     owner: "{{ NEW_USER_NAME }}"
     group: "{{ NEW_USER_NAME }}"
     mode: '0600'
