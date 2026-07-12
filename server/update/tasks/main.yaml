@@ -10,8 +10,10 @@
   register: apt_upgrade_result
 
 - name: Display upgraded packages
+  vars:
+    upgraded_pkgs: "{{ apt_upgrade_result.stdout_lines | select('match', '^Inst ') | map('regex_replace', '^Inst (\\S+).*', '\\1') | join(', ') }}"
   ansible.builtin.debug:
-    msg: "Packages upgraded on {{ inventory_hostname }}: {{ apt_upgrade_result.stdout_lines | select('match', '^Inst ') | map('regex_replace', '^Inst (\\S+).*', '\\1') | list | join(', ') }}"
+    msg: "Packages upgraded on {{ inventory_hostname }}: {{ upgraded_pkgs }}"
   when: apt_upgrade_result.changed
 
 - name: Remove packages that are no longer required
