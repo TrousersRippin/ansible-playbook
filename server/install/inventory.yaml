@@ -7,5 +7,3 @@ virtual_machines:
   hosts:
     ubuntu:
       ansible_host: 10.1.1.13
-    debian:
-      ansible_host: 10.1.1.14
