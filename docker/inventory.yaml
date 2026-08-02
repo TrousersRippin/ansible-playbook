@@ -6,4 +6,4 @@ virtual_machines:
     ansible_python_interpreter: /usr/bin/python3
   hosts:
     ubuntu:
-      ansible_host: *.*.*.*
+      ansible_host:
