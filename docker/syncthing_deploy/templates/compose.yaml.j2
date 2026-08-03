@@ -11,15 +11,14 @@ services:
       - TZ=Europe/Stockholm
       - PUID=1000
       - PGID=1000
+    volumes:
+      - /opt/stacks/{{ APP }}:/var/syncthing:rw
+      - /home/{{ USER }}:/var/syncthing/home:rw
     ports:
       - {{ PORT_NUMBER1 }}:{{ PORT_NUMBER1 }}/tcp
       - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/udp
       - {{ PORT_NUMBER3 }}:{{ PORT_NUMBER3 }}/tcp
       - {{ PORT_NUMBER3 }}:{{ PORT_NUMBER3 }}/udp
-    volumes:
-      - /opt/stacks/{{ APP }}:/var/syncthing:rw
-      - /home/{{ USER }}:/var/syncthing/home:rw
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - {{ NETWORK }}
 

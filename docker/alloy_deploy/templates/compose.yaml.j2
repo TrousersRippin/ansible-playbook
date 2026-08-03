@@ -14,8 +14,6 @@ services:
       - --server.http.listen-addr=0.0.0.0:12345
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
-    ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     pid: host
     volumes:
       - /opt/stacks/{{ APP }}/config/config.alloy:/etc/{{ APP }}/config.alloy:ro
@@ -29,6 +27,8 @@ services:
       - /var/log:/var/log:ro
       - /var/log/journal:/var/log/journal:ro
       - /etc/localtime:/etc/localtime:ro
+    ports:
+      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     networks:
       - {{ NETWORK }}
 

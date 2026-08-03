@@ -11,12 +11,11 @@ services:
       - TZ=Europe/Stockholm
       - PUID=1000
       - PGID=1000
-    ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     volumes:
       - /opt/stacks/{{ APP }}/config/config.production.json:/var/lib/ghost/config.production.json:ro
       - /opt/stacks/{{ APP }}/config:/var/lib/ghost/content:rw
-      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     networks:
       - {{ NETWORK }}
 

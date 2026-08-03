@@ -9,15 +9,13 @@ services:
       - no-new-privileges:true
     environment:
       - TZ=Europe/Stockholm
-    user: ${UID:-1000}:${GID:-1000}
-    ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     volumes:
       - /opt/stacks/{{ APP }}/config/{{ APP }}.ini:/etc/{{ APP }}/{{ APP }}.ini:rw
       - /opt/stacks/{{ APP }}/dashboards:/etc/{{ APP }}/dashboards:ro
       - /opt/stacks/{{ APP }}/provisioning:/etc/{{ APP }}/provisioning:ro
       - /opt/stacks/{{ APP }}/data:/var/lib/{{ APP }}:rw
-      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     networks:
       - {{ NETWORK }}
 

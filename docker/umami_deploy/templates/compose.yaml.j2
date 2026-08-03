@@ -7,12 +7,9 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    env_file:
-      - .env
+    env_file: .env
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - {{ NETWORK }}
 

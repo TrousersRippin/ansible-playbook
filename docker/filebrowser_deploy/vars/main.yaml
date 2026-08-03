@@ -1,5 +1,5 @@
 ---
-IMAGE_NAME: docker.io/filebrowser/filebrowser
+IMAGE_NAME: ghcr.io/gtsteffaniak/filebrowser
 IMAGE_TAG: latest
 APP: filebrowser
 NETWORK: ansible

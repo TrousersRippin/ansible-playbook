@@ -7,16 +7,14 @@ services:
     restart: unless-stopped
     sysctls:
       - net.ipv4.ip_local_port_range=1024 65000
-    env_file:
-      - .env
+    env_file: .env
+    volumes:
+      - /opt/stacks/{{ APP }}/config:/etc/dns:rw
     ports:
       - {{ PORT_NUMBER1 }}:{{ PORT_NUMBER1 }}/tcp
       - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/tcp
       - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/udp
       - {{ PORT_NUMBER3 }}:{{ PORT_NUMBER3 }}/tcp
-    volumes:
-      - /opt/stacks/{{ APP }}/config:/etc/dns:rw
-      - /etc/localtime:/etc/localtime:ro
     networks:
       - {{ NETWORK }}
 

@@ -9,13 +9,15 @@ services:
       - no-new-privileges:true
     environment:
       - TZ=Europe/Stockholm
-    user: ${UID:-1000}:${GID:-1000}
-    ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     volumes:
       - /opt/stacks/{{ APP }}/cache:/cache:rw
       - /opt/stacks/{{ APP }}/config:/config:rw
       - /etc/localtime:/etc/localtime:ro
+    ports:
+      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+    healthcheck:
+      disable: true
+    user: ${UID:-1000}:${GID:-1000}
     networks:
       - {{ NETWORK }}
 

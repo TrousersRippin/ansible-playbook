@@ -10,17 +10,9 @@
     state: started
     enabled: true
 
-- name: Create a directory for container config storage
+- name: Create a directory for container data storage
   ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/config"
-    state: directory
-    mode: '0755'
-    owner: "{{ USER }}"
-    group: "{{ USER }}"
-
-- name: Create a directory for container database storage
-  ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/database"
+    path: "/opt/stacks/{{ APP }}/data"
     state: directory
     mode: '0755'
     owner: "{{ USER }}"
@@ -28,8 +20,8 @@
 
 - name: Add config file
   ansible.builtin.copy:
-    src: "files/settings.json"
-    dest: "/opt/stacks/{{ APP }}/config/settings.json"
+    src: "files/config.yaml"
+    dest: "/opt/stacks/{{ APP }}/data/config.yaml"
     mode: '0644'
     owner: "{{ USER }}"
     group: "{{ USER }}"

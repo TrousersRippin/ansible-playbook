@@ -9,11 +9,10 @@ services:
       - no-new-privileges:true
     environment:
       - TZ=Europe/Stockholm
-    ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     volumes:
       - /opt/stacks/{{ APP }}/data:/data:rw
-      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     networks:
       - {{ NETWORK }}
 

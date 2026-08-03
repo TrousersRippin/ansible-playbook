@@ -7,13 +7,11 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    env_file:
-      - .env
-    ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+    env_file: .env
     volumes:
       - /opt/stacks/{{ APP }}/config:/config:ro
-      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     networks:
       - {{ NETWORK }}
 
