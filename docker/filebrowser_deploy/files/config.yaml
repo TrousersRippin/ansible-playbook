@@ -1,0 +1,33 @@
+server:
+  port: 8005
+  database: "data/filebrowser.sqlite"
+  cacheDir: "data/tmp"
+  sources:
+    - path: "/mnt/home-troy"
+      name: Home
+      config:
+        defaultEnabled: true
+    - path: "/mnt/host-mnt"
+      name: Mnt
+      config:
+        defaultEnabled: true
+    - path: "/mnt/host-opt"
+      name: Opt
+      config:
+        defaultEnabled: true
+
+auth:
+  tokenExpirationHours: 2
+  methods:
+    password:
+      enabled: true
+      minLength: 8
+    oidc:
+      enabled: true
+      clientId: "filebrowser"
+      issuerUrl: "https://authelia.thenoisykeyboard.com"
+      scopes: "openid profile groups email"
+      userIdentifier: "preferred_username"
+      createUser: true
+      groupsClaim: "groups"
+  adminUsername: admin
