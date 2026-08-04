@@ -31,6 +31,14 @@
     owner: "{{ USER }}"
     group: "{{ USER }}"
 
+- name: Create a directory for compose storage
+  ansible.builtin.file:
+    path: "/opt/stacks/compose/"
+    state: directory
+    mode: '0755'
+    owner: "{{ USER }}"
+    group: "{{ USER }}"
+
 - name: Add user to Docker group
   ansible.builtin.user:
     name: "{{ USER }}"

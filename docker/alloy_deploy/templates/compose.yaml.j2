@@ -9,6 +9,7 @@ services:
       - no-new-privileges:true
     environment:
       - TZ=Europe/Stockholm
+      - ALLOY_HOSTNAME={{ HOSTNAME }}
     command:
       - run 
       - --server.http.listen-addr=0.0.0.0:12345
@@ -17,7 +18,6 @@ services:
     pid: host
     volumes:
       - /opt/stacks/{{ APP }}/config/config.alloy:/etc/{{ APP }}/config.alloy:ro
-      - /opt/stacks/{{ APP }}/data:/var/lib/{{ APP }}/data:rw
       - {{ APP }}-data:/var/lib/{{ APP }}/data:rw
       - /:/rootfs:ro
       - /run:/run:ro
@@ -26,9 +26,11 @@ services:
       - /var/lib/docker:/var/lib/docker:ro
       - /var/log:/var/log:ro
       - /var/log/journal:/var/log/journal:ro
-      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+      - {{ PORT_NUMBER1 }}:{{ PORT_NUMBER1 }}/tcp
+      - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/udp
+    user: 0:0
     networks:
       - {{ NETWORK }}
 

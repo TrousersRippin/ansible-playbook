@@ -1,6 +1,0 @@
-[Unit]
-Description=Prometheus Data Volume
-
-[Volume]
-Label=app=prometheus-data
-VolumeName=prometheus-data

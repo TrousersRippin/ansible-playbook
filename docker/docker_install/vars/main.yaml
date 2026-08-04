@@ -8,6 +8,6 @@ docker_archs:
 docker_arch: "{{ docker_archs[ansible_facts.architecture] }}"
 docker_distribution_release: "{{ ansible_facts.distribution_release }}"
 USER: troy
-SUBNET: 10.66.42.0/24
-GATEWAY: 10.66.42.1
+SUBNET: 10.100.0.0/24
+GATEWAY: 10.100.0.1
 NETWORK: ansible

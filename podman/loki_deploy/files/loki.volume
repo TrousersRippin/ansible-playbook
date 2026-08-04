@@ -1,6 +1,0 @@
-[Unit]
-Description=Loki Data Volume
-
-[Volume]
-Label=app=loki-data
-VolumeName=loki-data

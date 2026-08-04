@@ -18,26 +18,10 @@
     owner: "{{ USER }}"
     group: "{{ USER }}"
 
-- name: Create a directory for container data storage
-  ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/data"
-    state: directory
-    mode: '0755'
-    owner: "{{ USER }}"
-    group: "{{ USER }}"
-
 - name: Add config file
   ansible.builtin.copy:
     src: "files/config.alloy"
     dest: "/opt/stacks/{{ APP }}/config/config.alloy"
-    mode: '0644'
-    owner: "{{ USER }}"
-    group: "{{ USER }}"
-
-- name: Add compose file
-  ansible.builtin.template:
-    src: "templates/compose.yaml.j2"
-    dest: "/opt/stacks/{{ APP }}/compose.yaml"
     mode: '0644'
     owner: "{{ USER }}"
     group: "{{ USER }}"
@@ -47,6 +31,22 @@
     name: "{{ APP }}-data"
     state: present
 
+- name: Create a directory for compose file
+  ansible.builtin.file:
+    path: "/opt/stacks/compose/{{ APP }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ USER }}"
+    group: "{{ USER }}"
+
+- name: Add compose file
+  ansible.builtin.template:
+    src: "templates/compose.yaml.j2"
+    dest: "/opt/stacks/compose/{{ APP }}/compose.yaml"
+    mode: '0644'
+    owner: "{{ USER }}"
+    group: "{{ USER }}"
+
 - name: Check if image exists
   community.docker.docker_image:
     name: "{{ IMAGE_NAME }}"
@@ -55,5 +55,5 @@
 
 - name: Start container
   community.docker.docker_compose_v2:
-    project_src: "/opt/stacks/{{ APP }}"
+    project_src: "/opt/stacks/compose/{{ APP }}"
     state: present

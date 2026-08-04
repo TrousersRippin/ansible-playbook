@@ -1,3 +1,9 @@
+/* Logging Configuration */
+logging {
+	level  = "info"
+	format = "logfmt"
+}
+
 /* Loki Write Endpoint */
 loki.write "default" {
 	endpoint {
@@ -7,156 +13,307 @@ loki.write "default" {
 
 /* Prometheus Remote Write Endpoint */
 prometheus.remote_write "default" {
-  	endpoint {
-    	url = "http://prometheus:9090/api/v1/write"
-  	}
+	endpoint {
+		url = "http://prometheus:9090/api/v1/write"
+		queue_config {
+			min_backoff = "1s"
+			max_backoff = "60s"
+		}
+	}
 }
 
 /* Docker Container Logs */
-discovery.docker "docker" {
+discovery.docker "containers" {
 	host = "unix:///var/run/docker.sock"
 }
 
-discovery.relabel "docker" {
-	targets = discovery.docker.docker.targets
-	
+discovery.relabel "containers" {
+	targets = discovery.docker.containers.targets
+
 	rule {
 		source_labels = ["__meta_docker_container_name"]
 		regex         = "/?(.*)"
-		target_label  = "container"
+		target_label  = "container_name"
 	}
-	
+
 	rule {
 		source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
 		regex         = "(.+)"
-		target_label  = "service_name"
+		target_label  = "service"
 	}
-	
+
 	rule {
 		source_labels = ["__meta_docker_container_image"]
 		target_label  = "image"
 	}
+
+	rule {
+		source_labels = ["__meta_docker_container_id"]
+		target_label  = "__path__"
+		replacement   = "/var/lib/docker/containers/${1}/${1}-json.log"
+	}
 }
 
-loki.source.docker "docker" {
-	host       = "unix:///var/run/docker.sock"
-	targets    = discovery.relabel.docker.output
-	labels     = {"platform" = "docker"}
+loki.source.file "docker_logs" {
+	targets    = discovery.relabel.containers.output
+	forward_to = [loki.process.docker_json.receiver]
+}
+
+loki.process "docker_json" {
 	forward_to = [loki.write.default.receiver]
+
+	stage.json {
+		expressions = {
+			output    = "log",
+			stream    = "stream",
+			timestamp = "time",
+		}
+	}
+
+	stage.timestamp {
+		source = "timestamp"
+		format = "RFC3339Nano"
+	}
+
+	stage.labels {
+		values = {
+			stream = "stream",
+		}
+	}
+
+	stage.output {
+		source = "output"
+	}
+
+	stage.static_labels {
+		values = {
+			log_source = "docker",
+			log_type   = "container",
+			host       = env("ALLOY_HOSTNAME"),
+		}
+	}
 }
 
 /* System Logs & Journal */
-discovery.relabel "journal" {
+discovery.relabel "systemd_journal" {
 	targets = []
-	
+
 	rule {
 		source_labels = ["__journal__systemd_unit"]
-		target_label  = "unit"
+		target_label  = "systemd_unit"
 	}
-	
+
 	rule {
 		source_labels = ["__journal__boot_id"]
 		target_label  = "boot_id"
 	}
-	
+
 	rule {
 		source_labels = ["__journal__transport"]
 		target_label  = "transport"
 	}
-	
+
 	rule {
 		source_labels = ["__journal_priority_keyword"]
-		target_label  = "level"
+		target_label  = "severity"
 	}
 }
 
-loki.source.journal "journal" {
-	max_age       = "24h0m0s"
-	relabel_rules = discovery.relabel.journal.rules
+/* Unpoller (UniFi) Metrics */
+discovery.relabel "unpoller" {
+	targets = [
+		{"__address__" = "unpoller:9130"},
+	]
+	rule {
+		target_label = "job"
+		replacement  = "unifi"
+	}
+}
+
+prometheus.scrape "unpoller" {
+	scrape_interval = "30s"
+	targets    = discovery.relabel.unpoller.output
+	forward_to = [prometheus.remote_write.default.receiver]
+}
+
+loki.source.journal "systemd_journal" {
+	max_age       = "4h0m0s"
+	relabel_rules = discovery.relabel.systemd_journal.rules
 	forward_to    = [loki.write.default.receiver]
-	labels        = {"component" = "system-journal"}
+	labels        = {"log_source" = "systemd", "log_type" = "journal", "host" = env("ALLOY_HOSTNAME")}
 	path          = "/var/log/journal"
 }
 
-local.file_match "system" {
-	path_targets = [{
-		__address__ = "localhost",
-		__path__    = "/var/log/{syslog,messages,auth.log,kern.log,dmesg}",
-		instance    = constants.hostname,
-		job         = string.format("%s-logs", constants.hostname),
-		component   = "system-logs",
-	}]
-}
-
-loki.source.file "system" {
-	targets    = local.file_match.system.targets
-	forward_to = [loki.write.default.receiver]
-}
-
 /* APT Package Manager Logs */
-local.file_match "apt" {
+local.file_match "apt_logs" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/apt/{history,term}.log",
-		instance    = constants.hostname,
-		job         = "apt",
-		component   = "apt",
+		instance    = env("ALLOY_HOSTNAME"),
+		job         = "apt-package-manager",
+		log_source  = "apt",
+		log_type    = "package-management",
+		host        = env("ALLOY_HOSTNAME"),
 	}]
 }
 
-loki.source.file "apt" {
-	targets    = local.file_match.apt.targets
+loki.source.file "apt_logs" {
+	targets    = local.file_match.apt_logs.targets
+	forward_to = [loki.write.default.receiver]
+}
+
+/* Fail2ban Security Logs */
+local.file_match "fail2ban_logs" {
+	path_targets = [{
+		__address__ = "localhost",
+		__path__    = "/var/log/fail2ban.log",
+		instance    = env("ALLOY_HOSTNAME"),
+		job         = "fail2ban-security",
+		log_source  = "fail2ban",
+		log_type    = "security",
+		host        = env("ALLOY_HOSTNAME"),
+	}]
+}
+
+loki.source.file "fail2ban_logs" {
+	targets    = local.file_match.fail2ban_logs.targets
 	forward_to = [loki.write.default.receiver]
 }
 
 /* Unattended Upgrades Logs */
-local.file_match "unattended_upgrades" {
+local.file_match "unattended_upgrades_logs" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/unattended-upgrades/unattended-upgrades*.log",
-		instance    = constants.hostname,
+		instance    = env("ALLOY_HOSTNAME"),
 		job         = "unattended-upgrades",
-		component   = "unattended-upgrades",
+		log_source  = "unattended-upgrades",
+		log_type    = "package-management",
+		category    = "auto-updates",
+		host        = env("ALLOY_HOSTNAME"),
 	}]
 }
 
-loki.source.file "unattended_upgrades" {
-	targets    = local.file_match.unattended_upgrades.targets
+loki.source.file "unattended_upgrades_logs" {
+	targets    = local.file_match.unattended_upgrades_logs.targets
 	forward_to = [loki.write.default.receiver]
 }
 
 /* System (Node) Metrics */
 discovery.relabel "metrics" {
-  targets = prometheus.exporter.unix.metrics.targets
-  rule {
-    target_label = "instance"
-    replacement  = constants.hostname
-  }
-  rule {
-    target_label = "job"
-    replacement  = string.format("%s-metrics", constants.hostname)
-  }
+	targets = prometheus.exporter.unix.metrics.targets
+	rule {
+		target_label = "instance"
+		replacement  = env("ALLOY_HOSTNAME")
+	}
+	rule {
+		target_label = "job"
+		replacement  = "homelab-metrics"
+	}
 }
 
 prometheus.exporter.unix "metrics" {
-  disable_collectors = ["ipvs", "btrfs", "infiniband", "xfs", "zfs"]
-  enable_collectors = ["meminfo"]
-  rootfs_path = "/rootfs"
-  filesystem {
-    fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|tmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
-    mount_points_exclude = "^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)"
-    mount_timeout        = "5s"
-  }
-  netclass {
-    ignored_devices = "^(veth.*|cali.*|[a-f0-9]{15})$"
-  }
-  netdev {
-    device_exclude = "^(veth.*|cali.*|[a-f0-9]{15})$"
-  }
+	disable_collectors = ["ipvs", "btrfs", "infiniband", "xfs", "zfs"]
+	rootfs_path = "/rootfs"
+	filesystem {
+		fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|tmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+		mount_points_exclude = "^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)"
+		mount_timeout        = "5s"
+	}
+	netclass {
+		ignored_devices = "^(veth.*|cali.*|[a-f0-9]{15})$"
+	}
+	netdev {
+		device_exclude = "^(veth.*|cali.*|[a-f0-9]{15})$"
+	}
 }
 
 prometheus.scrape "metrics" {
-  scrape_interval = "15s"
-  targets    = discovery.relabel.metrics.output
-  forward_to = [prometheus.remote_write.default.receiver]
+	scrape_interval = "30s"
+	targets    = discovery.relabel.metrics.output
+	forward_to = [prometheus.remote_write.default.receiver]
+}
+
+/* UniFi Syslog (CEF over raw UDP) */
+loki.relabel "unifi_syslog" {
+	forward_to = []
+}
+
+loki.source.syslog "unifi" {
+	listener {
+		address                = "alloy:5514"
+		protocol               = "udp"
+		syslog_format          = "raw"
+		use_incoming_timestamp = false
+		labels = {
+			job        = "unifi",
+			log_source = "unifi",
+			log_type   = "firewall",
+		}
+	}
+	relabel_rules = loki.relabel.unifi_syslog.rules
+	forward_to    = [loki.process.unifi.receiver]
+}
+
+loki.process "unifi" {
+	// 1. Extract optional syslog header (not present on all messages)
+	stage.regex {
+		expression = `^(?:(?P<ts>[A-Z][a-z]{2}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+(?P<host>\S+)\s+)?(?P<payload>CEF:.*)$`
+	}
+	stage.labels {
+		values = { host = "" }
+	}
+
+	// 2. Extract CEF header fields
+	// Format: CEF:Version|DeviceVendor|DeviceProduct|DeviceVersion|EventClassID|Name|Severity|Extension
+	stage.regex {
+		expression = `CEF:0\|[^|]+\|[^|]+\|[^|]+\|(?P<event_id>[^|]+)\|(?P<event_name>[^|]+)\|(?P<severity>[^|]+)\|(?P<extension>.*)$`
+	}
+	stage.labels {
+		values = {
+			event_id   = "",
+			event_name = "",
+			severity   = "",
+		}
+	}
+
+	// 3. Extract low-cardinality CEF extension fields as labels
+	// IPs, ports, MACs are left in the log line — too high cardinality for labels
+	stage.regex {
+		expression = `UNIFIcategory=(?P<category>\S+)`
+	}
+	stage.labels {
+		values = { category = "" }
+	}
+
+	stage.regex {
+		expression = `proto=(?P<proto>\S+)`
+	}
+	stage.labels {
+		values = { proto = "" }
+	}
+
+	stage.regex {
+		expression = `act=(?P<action>\S+)`
+	}
+	stage.labels {
+		values = { action = "" }
+	}
+
+	// 4. Extract and apply UTC timestamp from CEF extension
+	// Must happen before stage.output replaces the log line with payload only
+	stage.regex {
+		expression = `UNIFIutcTime=(?P<utc_time>\S+)`
+	}
+	stage.timestamp {
+		source = "utc_time"
+		format = "2006-01-02T15:04:05.999Z"
+	}
+
+	// 5. Replace log line with CEF payload only, dropping syslog header prefix
+	stage.output {
+		source = "payload"
+	}
+
+	forward_to = [loki.write.default.receiver]
 }
