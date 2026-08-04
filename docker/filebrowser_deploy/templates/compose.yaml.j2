@@ -11,7 +11,6 @@ services:
     volumes:
       - /opt/stacks/{{ APP }}/data:/home/filebrowser/data:rw
       - /home/troy:/mnt/home-troy:rw
-      - /mnt:/mnt/host-mnt:rw
       - /opt/stacks:/mnt/host-opt:rw
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp

@@ -7,10 +7,6 @@ server:
       name: Home
       config:
         defaultEnabled: true
-    - path: "/mnt/host-mnt"
-      name: Mnt
-      config:
-        defaultEnabled: true
     - path: "/mnt/host-opt"
       name: Opt
       config:
@@ -22,12 +18,4 @@ auth:
     password:
       enabled: true
       minLength: 8
-    oidc:
-      enabled: true
-      clientId: "filebrowser"
-      issuerUrl: "https://authelia.thenoisykeyboard.com"
-      scopes: "openid profile groups email"
-      userIdentifier: "preferred_username"
-      createUser: true
-      groupsClaim: "groups"
   adminUsername: admin
