@@ -1,0 +1,7 @@
+---
+IMAGE_NAME: ghcr.io/getarcaneapp/manager
+IMAGE_TAG: latest
+APP: arcane
+NETWORK: ansible
+PORT_NUMBER: 3552
+USER: troy
