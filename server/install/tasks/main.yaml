@@ -237,6 +237,12 @@
 # =============================================================================
 # Fail2ban
 # =============================================================================
+# NOTE: fail2ban bans by manipulating iptables/nftables, which needs
+# CAP_NET_ADMIN and netfilter kernel modules exposed into the container
+# namespace. Unprivileged LXC containers often lack this, so bans can
+# silently no-op even though the service itself starts fine. Skipping
+# entirely on LXC; if you need this on privileged LXC, drop the guard
+# and verify with `fail2ban-client status sshd` after a test ban.
 - name: Create fail2ban jail.local
   ansible.builtin.copy:
     dest: /etc/fail2ban/jail.local
@@ -251,12 +257,14 @@
       [sshd]
       enabled = true
       backend = auto
+  when: not is_lxc
 
 - name: Start and enable fail2ban
   ansible.builtin.service:
     name: fail2ban
     state: started
     enabled: true
+  when: not is_lxc
 
 # =============================================================================
 # UFW
@@ -365,12 +373,16 @@
     name: systemd-resolved
     enabled: true
 
+# NOTE: /etc/resolv.conf is commonly bind-mounted from the LXC host, so it
+# can't be removed/relinked from inside the container (Device or resource
+# busy). Skipping the relink on LXC and leaving whatever the host provides.
 - name: Configure resolv.conf symlink
   ansible.builtin.file:
     src: "{{ '/run/systemd/resolve/resolv.conf' if dns_server | default(false) | bool else '/run/systemd/resolve/stub-resolv.conf' }}"
     dest: /etc/resolv.conf
     state: link
     force: true
+  when: not is_lxc
 
 # =============================================================================
 # systemd-journald
@@ -408,6 +420,9 @@
 # =============================================================================
 # Kernel parameters
 # =============================================================================
+# NOTE: kernel.printk is not namespaced, so unprivileged LXC containers
+# generally can't apply it (systemd-sysctl will log a failure at boot even
+# though this copy task itself succeeds). Skipping entirely on LXC.
 - name: Configure quiet console kernel parameters
   ansible.builtin.copy:
     dest: /etc/sysctl.d/00-console_quiet.conf
@@ -415,6 +430,7 @@
     content: |
       kernel.printk=1 4 1 4
   failed_when: false
+  when: not is_lxc
 
 - name: Create systemd system.conf.d directory
   ansible.builtin.file:
@@ -434,6 +450,9 @@
 # =============================================================================
 # Console
 # =============================================================================
+# NOTE: these target a real virtual console (/dev/tty0, framebuffer) that
+# doesn't exist in an LXC container. Harmless to run, but a no-op, so
+# skipping to save time/noise.
 - name: Configure /etc/issue
   vars:
     os_color: "{{ '33' if ansible_distribution == 'Ubuntu' else '32' }}"
@@ -446,30 +465,35 @@
       \e[90m\d \t\e[0m
       \e[31m{{ ansible_default_ipv4.interface }}:\e[0m \4{{ '{' }}{{ ansible_default_ipv4.interface }}{{ '}' }}
       \e[36mconsole:\e[0m \l
+  when: not is_lxc
 
 - name: Configure keyboard layout
   ansible.builtin.lineinfile:
     path: /etc/default/keyboard
     regexp: '^XKBVARIANT='
     line: 'XKBVARIANT="mac_intl"'
+  when: not is_lxc
 
 - name: Configure console codeset
   ansible.builtin.lineinfile:
     path: /etc/default/console-setup
     regexp: '^CODESET='
     line: 'CODESET="Lat15"'
+  when: not is_lxc
 
 - name: Configure console font face
   ansible.builtin.lineinfile:
     path: /etc/default/console-setup
     regexp: '^FONTFACE='
     line: 'FONTFACE="Terminus"'
+  when: not is_lxc
 
 - name: Configure console font size
   ansible.builtin.lineinfile:
     path: /etc/default/console-setup
     regexp: '^FONTSIZE='
     line: 'FONTSIZE="8x16"'
+  when: not is_lxc
 
 # =============================================================================
 # Systemd-boot
@@ -487,6 +511,12 @@
 # =============================================================================
 # Reboot
 # =============================================================================
+# NOTE: inside LXC this only restarts the container, and whether it comes
+# back up depends on the host's restart policy for that container (e.g.
+# Proxmox onboot/restart settings). If the host doesn't auto-restart it,
+# Ansible just waits out reboot_timeout and fails. Skipping on LXC — restart
+# the container from the host instead if you need this applied immediately.
 - name: Reboot
   ansible.builtin.reboot:
     reboot_timeout: 300
+  when: not is_lxc
