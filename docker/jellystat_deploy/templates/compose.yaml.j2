@@ -1,0 +1,27 @@
+---
+services:
+  {{ APP }}:
+    image: {{ IMAGE_NAME }}:{{ IMAGE_TAG }}
+    container_name: {{ APP }}
+    hostname: {{ APP }}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-file: 5
+        max-size: 10m
+    env_file: .env
+    volumes:
+      - /opt/stacks/{{ APP }}/data:/app/backend/backup-data:rw
+    ports:
+      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+    healthcheck:
+      disable: true
+    networks:
+      - {{ NETWORK }}
+
+networks:
+  {{ NETWORK }}:
+    external: true

@@ -1,0 +1,26 @@
+---
+services:
+  {{ APP }}:
+    image: {{ IMAGE_NAME }}:{{ IMAGE_TAG }}
+    container_name: {{ APP }}
+    hostname: {{ APP }}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    command: postgres --hba-file=/etc/postgresql/pg_hba.conf
+    env_file: .env
+    volumes:
+      - /opt/stacks/{{ APP }}/config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - {{ APP }}-data:/var/lib/postgresql:rw
+    ports:
+      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+    networks:
+      - {{ NETWORK }}
+
+volumes:
+  {{ APP }}-data:
+    external: true
+
+networks:
+  {{ NETWORK }}:
+    external: true

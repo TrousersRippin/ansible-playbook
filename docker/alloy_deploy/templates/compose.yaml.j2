@@ -7,14 +7,14 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    environment:
-      - TZ=Europe/Stockholm
-      - ALLOY_HOSTNAME={{ HOSTNAME }}
     command:
       - run 
       - --server.http.listen-addr=0.0.0.0:12345
       - --storage.path=/var/lib/alloy/data
       - /etc/alloy/config.alloy
+    environment:
+      - TZ=Europe/Stockholm
+      - ALLOY_HOSTNAME={{ HOSTNAME }}
     pid: host
     volumes:
       - /opt/stacks/{{ APP }}/config/config.alloy:/etc/{{ APP }}/config.alloy:ro
