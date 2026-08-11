@@ -21,14 +21,15 @@
     # - gotify_deploy
     # - grafana_deploy
     # - homepage_deploy
-    - jellyfin_deploy
-    - jellystat_deploy
+    # - jellyfin_deploy
+    # - jellystat_deploy
     # - loki_deploy
     # - memos_deploy
     # - mkvtoolnix_deploy
     # - myspeed_deploy
+    # - photoprism_deploy
     # - plex_deploy
-    - postgres_deploy
+    # - postgres_deploy
     # - prometheus_deploy
     # - prowlarr_deploy
     # - radarr_deploy
