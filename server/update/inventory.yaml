@@ -8,6 +8,8 @@ bare_metal:
   hosts:
     zimacube:
       ansible_host: 10.1.1.11
+    beelink:
+      ansible_host: 10.1.2.13
 virtual_machines:
   hosts:
     ubuntu:
