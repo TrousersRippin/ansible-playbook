@@ -15,7 +15,7 @@
     # - audiobookshelf_deploy
     # - bazarr_deploy
     - dozzle_deploy
-    # - filebrowser_deploy
+    - filebrowser_deploy
     # - gatus_deploy
     # - ghost_deploy
     # - gotify_deploy

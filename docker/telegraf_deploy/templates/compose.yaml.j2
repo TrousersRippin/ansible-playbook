@@ -16,8 +16,9 @@ services:
     ports:
       - {{ PORT_NUMBER1 }}:{{ PORT_NUMBER1 }}/tcp
       - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/tcp
-    user: ${UID}:{{ docker_gid }}
-    group_add: [987]
+      - {{ PORT_NUMBER3 }}:{{ PORT_NUMBER3 }}/udp
+    user: ${UID:-1000}:${GID:-1000}
+    group_add: [{{ DOCKER_GID }}]
     networks:
       - {{ NETWORK }}
 

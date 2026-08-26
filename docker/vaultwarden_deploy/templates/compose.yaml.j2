@@ -9,7 +9,7 @@ services:
       - no-new-privileges:true
     environment: .env
     volumes:
-      - /opt/stacks/{{ APP }}/data:/data:rw
+      - /opt/stacks/{{ APP }}/config:/data:rw
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     user: ${UID:-1000}:${GID:-1000}

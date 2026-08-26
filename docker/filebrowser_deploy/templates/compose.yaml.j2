@@ -9,13 +9,15 @@ services:
       - no-new-privileges:true
     env_file: .env
     volumes:
-      - /opt/stacks/{{ APP }}/data:/home/filebrowser/data:rw
+      - /opt/stacks/{{ APP }}/config:/home/{{ APP }}/config:rw
+      - /opt/stacks/{{ APP }}/data:/home/{{ APP }}/data:rw
       - /home/troy:/mnt/home-troy:rw
       - /opt/stacks:/mnt/host-opt:rw
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     healthcheck:
       disable: true
+    user: ${UID:-1000}:${GID:-1000}      
     networks:
       - {{ NETWORK }}
 
