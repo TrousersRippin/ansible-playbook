@@ -106,6 +106,24 @@
     owner: "{{ USER }}"
     group: "{{ USER }}"
 
+- name: Add node-exporter dashboard file
+  ansible.builtin.copy:
+    src: "files/node-exporter.json"
+    dest: "/opt/stacks/{{ APP }}/dashboards/node-exporter.json"
+    mode: '0644'
+    owner: "{{ USER }}"
+    group: "{{ USER }}"
+
+- name: Get target user UID/GID
+  ansible.builtin.command: getent passwd "{{ USER }}"
+  register: grafana_user_info
+  changed_when: false
+
+- name: Set user_uid and user_gid facts
+  ansible.builtin.set_fact:
+    user_uid: "{{ grafana_user_info.stdout.split(':')[2] }}"
+    user_gid: "{{ grafana_user_info.stdout.split(':')[3] }}"
+
 - name: Create a directory for compose file
   ansible.builtin.file:
     path: "/opt/stacks/compose/{{ APP }}"

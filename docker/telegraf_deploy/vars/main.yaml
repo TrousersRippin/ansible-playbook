@@ -2,7 +2,6 @@
 IMAGE_NAME: docker.io/library/telegraf
 IMAGE_TAG: latest
 APP: telegraf
-DOCKER_GID: 103
 NETWORK: ansible
 PORT_NUMBER1: 8125
 PORT_NUMBER2: 9273

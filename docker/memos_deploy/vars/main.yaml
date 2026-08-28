@@ -1,6 +1,6 @@
 ---
-IMAGE_NAME: docker.io/neosmemo/memos
-IMAGE_TAG: latest
+IMAGE_NAME: ghcr.io/usememos/memos
+IMAGE_TAG: stable
 APP: memos
 NETWORK: ansible
 PORT_NUMBER: 5230

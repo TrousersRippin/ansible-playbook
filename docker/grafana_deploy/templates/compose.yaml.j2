@@ -16,6 +16,7 @@ services:
       - /opt/stacks/{{ APP }}/data:/var/lib/{{ APP }}:rw
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+    user: "{{ user_uid }}:{{ user_gid }}"
     networks:
       - {{ NETWORK }}
 

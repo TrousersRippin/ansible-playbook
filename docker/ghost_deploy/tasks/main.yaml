@@ -19,8 +19,8 @@
     group: "{{ USER }}"
 
 - name: Add config file
-  ansible.builtin.copy:
-    src: "files/config.production.json"
+  ansible.builtin.template:
+    src: "templates/config.production.json.j2"
     dest: "/opt/stacks/{{ APP }}/config/config.production.json"
     mode: '0644'
     owner: "{{ USER }}"

@@ -1,4 +1,8 @@
 ---
+- name: Include role secrets
+  ansible.builtin.include_vars:
+    file: secrets.yml
+
 - name: Ensure Docker-Compose is installed
   ansible.builtin.package:
     name: docker-compose
@@ -47,6 +51,52 @@
     name: "{{ IMAGE_NAME }}"
     tag: "{{ IMAGE_TAG }}"
     source: pull
+
+- name: Wait for PostgreSQL to be healthy
+  community.docker.docker_container_info:
+    name: postgres
+  register: postgres_info
+  until: postgres_info.exists and (postgres_info.container.State.Health | default({})).Status | default("") == "healthy"
+  retries: 30
+  delay: 10
+  failed_when: false
+
+- name: Check if PostgreSQL is healthy
+  ansible.builtin.fail:
+    msg: "PostgreSQL container not healthy. Cannot proceed with deployment."
+  when: not postgres_info.exists or (postgres_info.container.State.Health | default({})).Status | default("") != "healthy"
+
+- name: Check if PostgreSQL role for jellystat exists
+  community.docker.docker_container_exec:
+    container: postgres
+    command: psql -U postgres -tAc "SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = '{{ DB_USER }}'"
+  register: jellystat_role_check
+  changed_when: false
+
+- name: Create PostgreSQL role for jellystat
+  community.docker.docker_container_exec:
+    container: postgres
+    command: psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE ROLE {{ DB_USER }} LOGIN PASSWORD '{{ DB_PASSWORD }}'"
+  when: jellystat_role_check.stdout | trim != "1"
+
+- name: Ensure PostgreSQL role for jellystat has the expected password
+  community.docker.docker_container_exec:
+    container: postgres
+    command: psql -U postgres -v ON_ERROR_STOP=1 -c "ALTER ROLE {{ DB_USER }} WITH LOGIN PASSWORD '{{ DB_PASSWORD }}'"
+  changed_when: false
+
+- name: Check if jellystat database exists
+  community.docker.docker_container_exec:
+    container: postgres
+    command: psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '{{ DB_NAME }}'"
+  register: jellystat_db_check
+  changed_when: false
+
+- name: Create jellystat database
+  community.docker.docker_container_exec:
+    container: postgres
+    command: psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE {{ DB_NAME }} OWNER {{ DB_USER }}"
+  when: jellystat_db_check.stdout | trim != "1"
 
 - name: Start container
   community.docker.docker_compose_v2:

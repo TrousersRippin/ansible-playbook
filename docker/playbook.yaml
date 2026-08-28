@@ -1,9 +1,16 @@
-# ansible-vault encrypt /Users/troy/Documents/Tech/Configuration/Ansible-Playbook/docker/docker_install/vars/main.yaml
-# ansible-vault decrypt /Users/troy/Documents/Tech/Configuration/Ansible-Playbook/docker/docker_install/vars/main.yaml
-
+# Secrets live in vault-encrypted files, not in vars/main.yaml or the .j2 templates directly:
+#   - group_vars/all/vault.yml           shared secrets (e.g. SMTP creds used by ghost_deploy + vaultwarden_deploy)
+#   - <role>/vars/secrets.yml            role-local secrets, auto-loaded by each role's first task (include_vars)
+#
+# To view/edit an encrypted file:
+#   ansible-vault view   group_vars/all/vault.yml
+#   ansible-vault edit   vaultwarden_deploy/vars/secrets.yml
+#
+# To encrypt a new secrets.yml you create by hand:
+#   ansible-vault encrypt <role>/vars/secrets.yml
+#
 # cd $HOME/Documents/Tech/Configuration/Ansible-Playbook/docker
-# ansible-playbook --ask-vault-password playbook.yaml -i inventory.yaml --ask-become-pass --key-file $HOME/.ssh/id_ed25519
-# ansible-playbook --ask-vault-password playbook.yaml -i inventory.yaml
+# ansible-playbook playbook.yaml -i inventory.yaml --key-file $HOME/.ssh/id_ed25519 --ask-vault-password
 
 ---
 - name: Install Docker Homelab
@@ -12,6 +19,7 @@
   roles:
     - docker_install
     # - alloy_deploy
+    # - arcane_deploy
     # - audiobookshelf_deploy
     # - bazarr_deploy
     - dozzle_deploy

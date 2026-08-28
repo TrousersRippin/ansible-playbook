@@ -5,3 +5,5 @@ APP: jellystat
 NETWORK: ansible
 PORT_NUMBER: 3000
 USER: troy
+DB_USER: jellystat
+DB_NAME: jellystat

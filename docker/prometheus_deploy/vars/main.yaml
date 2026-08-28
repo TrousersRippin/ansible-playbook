@@ -2,7 +2,7 @@
 IMAGE_NAME: docker.io/prom/prometheus
 IMAGE_TAG: latest
 APP: prometheus
-NETWORKNAME: ansible
+NETWORK: ansible
 PORT_NUMBER: 9090
 USER: troy
 NOBODY: 65534

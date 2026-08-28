@@ -1,4 +1,8 @@
 ---
+- name: Include role secrets
+  ansible.builtin.include_vars:
+    file: secrets.yml
+
 - name: Ensure Docker-Compose is installed
   ansible.builtin.package:
     name: docker-compose

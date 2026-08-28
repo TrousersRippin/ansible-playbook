@@ -2,7 +2,7 @@
 IMAGE_NAME: docker.io/grafana/loki
 IMAGE_TAG: latest
 APP: loki
-NETWORKNAME: ansible
+NETWORK: ansible
 PORT_NUMBER1: 3100
 PORT_NUMBER2: 9096
 USER: troy
