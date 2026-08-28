@@ -11,6 +11,7 @@ services:
     volumes:
       - /opt/stacks/{{ APP }}/data:/data:rw
       - /opt/stacks:/opt/stacks:rw
+      - /tmp:/backups:rw
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp

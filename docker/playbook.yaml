@@ -3,8 +3,8 @@
 #   - <role>/vars/secrets.yml            role-local secrets, auto-loaded by each role's first task (include_vars)
 #
 # To view/edit an encrypted file:
-#   ansible-vault view   group_vars/all/vault.yml
-#   ansible-vault edit   vaultwarden_deploy/vars/secrets.yml
+#   ansible-vault view group_vars/all/vault.yml
+#   ansible-vault edit vaultwarden_deploy/vars/secrets.yml
 #
 # To encrypt a new secrets.yml you create by hand:
 #   ansible-vault encrypt <role>/vars/secrets.yml
@@ -17,13 +17,13 @@
   hosts: virtual_machines
   become: true
   roles:
-    - docker_install
+    # - docker_install
     # - alloy_deploy
     # - arcane_deploy
     # - audiobookshelf_deploy
     # - bazarr_deploy
-    - dozzle_deploy
-    - filebrowser_deploy
+    # - dozzle_deploy
+    # - filebrowser_deploy
     # - gatus_deploy
     # - ghost_deploy
     # - gotify_deploy

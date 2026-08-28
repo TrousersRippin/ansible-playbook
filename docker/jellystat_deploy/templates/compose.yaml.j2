@@ -16,7 +16,7 @@ services:
     volumes:
       - /opt/stacks/{{ APP }}/data:/app/backend/backup-data:rw
     ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+      - 3498:{{ PORT_NUMBER }}/tcp
     healthcheck:
       disable: true
     networks:

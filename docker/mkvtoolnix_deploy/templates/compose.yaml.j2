@@ -11,8 +11,10 @@ services:
       - TZ=Europe/Stockholm
       - PUID=1000
       - PGID=1000
+      - DARK_MODE=1
     volumes:
       - /opt/stacks/{{ APP }}/config:/config:rw
+      - /home/{{ USER }}:/storage:rw
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     networks:
