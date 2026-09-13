@@ -48,7 +48,7 @@
 
 - name: Create a Docker network
   community.docker.docker_network:
-    name: ansible
+    name: proxy
     ipam_config:
       - subnet: "{{ SUBNET }}"
         gateway: "{{ GATEWAY }}"

@@ -2,6 +2,6 @@
 IMAGE_NAME: docker.io/library/ghost
 IMAGE_TAG: latest
 APP: ghost
-NETWORK: ansible
+NETWORK: proxy
 PORT_NUMBER: 2368
 USER: troy

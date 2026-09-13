@@ -2,8 +2,9 @@
 IMAGE_NAME: ghcr.io/cyfershepard/jellystat
 IMAGE_TAG: latest
 APP: jellystat
-NETWORK: ansible
-PORT_NUMBER: 3000
+NETWORK: proxy
+PORT_NUMBER: 3005
+DEFAULT_PORT_NUMBER: 3000
 USER: troy
 DB_USER: jellystat
 DB_NAME: jellystat

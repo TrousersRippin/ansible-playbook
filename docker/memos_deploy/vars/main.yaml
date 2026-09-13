@@ -2,6 +2,6 @@
 IMAGE_NAME: ghcr.io/usememos/memos
 IMAGE_TAG: stable
 APP: memos
-NETWORK: ansible
+NETWORK: proxy
 PORT_NUMBER: 5230
 USER: troy

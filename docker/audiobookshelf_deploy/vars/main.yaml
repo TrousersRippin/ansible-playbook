@@ -2,6 +2,6 @@
 IMAGE_NAME: docker.io/advplyr/audiobookshelf
 IMAGE_TAG: latest
 APP: audiobookshelf
-NETWORK: ansible
+NETWORK: proxy
 PORT_NUMBER: 13378
 USER: troy

@@ -3,6 +3,6 @@ IMAGE_NAME: docker.io/amir20/dozzle
 IMAGE_TAG: latest
 APP: dozzle
 HOSTNAME: ubuntu
-NETWORK: ansible
-PORT_NUMBER: 8008
+NETWORK: proxy
+PORT_NUMBER: 8080
 USER: troy

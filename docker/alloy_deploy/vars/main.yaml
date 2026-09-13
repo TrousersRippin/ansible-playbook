@@ -3,7 +3,7 @@ IMAGE_NAME: docker.io/grafana/alloy
 IMAGE_TAG: latest
 APP: alloy
 HOSTNAME: ubuntu
-NETWORK: ansible
+NETWORK: proxy
 PORT_NUMBER1: 12345
 PORT_NUMBER2: 5514
 USER: troy

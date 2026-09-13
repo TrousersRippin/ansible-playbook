@@ -1,6 +1,7 @@
 ---
 all:
   vars:
+    ansible_user: troy
     ansible_become: true
     ansible_become_method: sudo
     ansible_python_interpreter: /usr/bin/python3
@@ -10,11 +11,17 @@ bare_metal:
       ansible_host: 10.1.1.11
     beelink:
       ansible_host: 10.1.2.14
-virtual_machines:
-  hosts:
-    server-01:
-      ansible_host: 10.1.2.61
-    server-02:
-      ansible_host: 10.1.2.62
-    server-03:
-      ansible_host: 10.1.2.63
+#virtual_machines:
+  #hosts:
+    #k3s-01:
+    #  ansible_host: 10.1.2.61
+    #k3s-02:
+    #  ansible_host: 10.1.2.62
+    #k3s-03:
+    #  ansible_host: 10.1.2.63
+    #hashicorp-01:
+    #  ansible_host: 10.1.2.71
+    #hashicorp-02:
+    #  ansible_host: 10.1.2.72
+    #hashicorp-03:
+    #  ansible_host: 10.1.2.73

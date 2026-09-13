@@ -2,6 +2,6 @@
 IMAGE_NAME: docker.io/germannewsmaker/myspeed
 IMAGE_TAG: latest
 APP: myspeed
-NETWORK: ansible
+NETWORK: proxy
 PORT_NUMBER: 5216
 USER: troy

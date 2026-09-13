@@ -2,6 +2,6 @@
 IMAGE_NAME: ghcr.io/gtsteffaniak/filebrowser
 IMAGE_TAG: latest
 APP: filebrowser
-NETWORK: ansible
+NETWORK: proxy
 PORT_NUMBER: 8005
 USER: troy

@@ -2,6 +2,7 @@
 IMAGE_NAME: docker.io/vaultwarden/server
 IMAGE_TAG: latest
 APP: vaultwarden
-NETWORK: ansible
-PORT_NUMBER: 8877
+NETWORK: proxy
+PORT_NUMBER: 8003
+DEFAULT_PORT_NUMBER: 80
 USER: troy

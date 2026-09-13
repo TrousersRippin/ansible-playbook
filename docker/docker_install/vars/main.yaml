@@ -10,4 +10,4 @@ docker_distribution_release: "{{ ansible_facts.distribution_release }}"
 USER: troy
 SUBNET: 10.100.0.0/24
 GATEWAY: 10.100.0.1
-NETWORK: ansible
+NETWORK: proxy

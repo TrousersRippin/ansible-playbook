@@ -12,8 +12,8 @@ services:
     volumes:
       - /opt/stacks/{{ APP }}/config/{{ APP }}.ini:/etc/{{ APP }}/{{ APP }}.ini:rw
       - /opt/stacks/{{ APP }}/dashboards:/etc/{{ APP }}/dashboards:ro
-      - /opt/stacks/{{ APP }}/provisioning:/etc/{{ APP }}/provisioning:ro
       - /opt/stacks/{{ APP }}/data:/var/lib/{{ APP }}:rw
+      - /opt/stacks/{{ APP }}/provisioning:/etc/{{ APP }}/provisioning:ro
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     user: "{{ user_uid }}:{{ user_gid }}"

@@ -14,4 +14,4 @@ storage:
   type: memory
 
 web:
-  port: 8899
+  port: 8080

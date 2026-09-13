@@ -1,9 +1,10 @@
 ---
 virtual_machines:
   vars:
+    ansible_user: troy
     ansible_become: true
     ansible_become_method: sudo
     ansible_python_interpreter: /usr/bin/python3
   hosts:
-    ubuntu:
-      ansible_host: 10.1.2.14
+    docker:
+      ansible_host: 10.111.11.20

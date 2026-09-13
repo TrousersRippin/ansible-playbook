@@ -1,6 +1,7 @@
 ---
 virtual_machines:
   vars:
+    ansible_user: troy
     ansible_become: true
     ansible_become_method: sudo
     ansible_python_interpreter: /usr/bin/python3

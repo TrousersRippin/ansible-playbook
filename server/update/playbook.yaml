@@ -3,7 +3,7 @@
 
 ---
 - name: Server Update
-  hosts: bare_metal:virtual_machines
+  hosts: bare_metal
   vars_files:
     - vars/main.yaml
   tasks:

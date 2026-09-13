@@ -2,7 +2,7 @@
 IMAGE_NAME: docker.io/library/telegraf
 IMAGE_TAG: latest
 APP: telegraf
-NETWORK: ansible
+NETWORK: proxy
 PORT_NUMBER1: 8125
 PORT_NUMBER2: 9273
 PORT_NUMBER3: 6343

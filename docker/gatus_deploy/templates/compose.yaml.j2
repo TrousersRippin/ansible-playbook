@@ -11,7 +11,7 @@ services:
     volumes:
       - /opt/stacks/{{ APP }}/config:/config:ro
     ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+      - {{ PORT_NUMBER }}:{{ DEFAULT_PORT_NUMBER }}/tcp
     networks:
       - {{ NETWORK }}
 

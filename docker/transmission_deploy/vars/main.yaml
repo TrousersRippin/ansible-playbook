@@ -2,7 +2,7 @@
 IMAGE_NAME: lscr.io/linuxserver/transmission
 IMAGE_TAG: latest
 APP: transmission
-NETWORK: ansible
+NETWORK: proxy
 PORT_NUMBER1: 9091
 PORT_NUMBER2: 51413
 USER: troy

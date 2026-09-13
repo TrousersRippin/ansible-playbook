@@ -14,7 +14,7 @@ services:
       - /opt/stacks/{{ APP }}/config:/config:rw
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+      - {{ PORT_NUMBER }}:{{ DEFAULT_PORT_NUMBER }}/tcp
     healthcheck:
       disable: true
     networks:
