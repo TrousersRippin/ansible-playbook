@@ -15,7 +15,7 @@ services:
       - /opt/stacks/{{ APP }}/metadata:/metadata:rw
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
-    user: ${UID:-1000}:${GID:-1000}
+    user: 1000:1000
     networks:
       - {{ NETWORK }}
 

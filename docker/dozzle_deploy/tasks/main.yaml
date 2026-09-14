@@ -10,6 +10,14 @@
     state: started
     enabled: true
 
+- name: Create a directory for container config storage
+  ansible.builtin.file:
+    path: "/opt/stacks/{{ APP }}/config"
+    state: directory
+    mode: '0755'
+    owner: "{{ USER }}"
+    group: "{{ USER }}"
+
 - name: Create a directory for compose file
   ansible.builtin.file:
     path: "/opt/stacks/compose/{{ APP }}"

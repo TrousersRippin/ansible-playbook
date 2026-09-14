@@ -1,9 +1,0 @@
----
-IMAGE_NAME: docker.io/umamisoftware/umami
-IMAGE_TAG: postgresql-latest
-APP: umami
-NETWORK: proxy
-PORT_NUMBER: 3210
-USER: troy
-DB_USER: umami
-DB_NAME: umami

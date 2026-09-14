@@ -13,7 +13,6 @@ services:
       - PGID=1000
     volumes:
       - /opt/stacks/{{ APP }}/config:/config:rw
-      - /etc/localtime:/etc/localtime:ro
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     networks:

@@ -14,10 +14,8 @@ services:
       - /:/hostfs:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - {{ PORT_NUMBER1 }}:{{ PORT_NUMBER1 }}/tcp
-      - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/tcp
-      - {{ PORT_NUMBER3 }}:{{ PORT_NUMBER3 }}/udp
-    user: ${UID:-1000}:${GID:-1000}
+      - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
+    user: 1000:1000
     group_add: [{{ docker_gid }}]
     networks:
       - {{ NETWORK }}

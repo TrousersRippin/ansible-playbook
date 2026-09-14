@@ -3,6 +3,5 @@ IMAGE_NAME: docker.io/grafana/loki
 IMAGE_TAG: latest
 APP: loki
 NETWORK: proxy
-PORT_NUMBER1: 3100
-PORT_NUMBER2: 9096
+PORT_NUMBER: 3100
 USER: troy

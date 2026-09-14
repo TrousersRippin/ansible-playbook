@@ -14,7 +14,7 @@ services:
       - {{ PORT_NUMBER }}:{{ DEFAULT_PORT_NUMBER }}/tcp
     healthcheck:
       disable: true
-    user: ${UID:-1000}:${GID:-1000}
+    user: 1000:1000
     networks:
       - {{ NETWORK }}
 

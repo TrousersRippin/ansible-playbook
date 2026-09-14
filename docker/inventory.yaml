@@ -6,5 +6,5 @@ virtual_machines:
     ansible_become_method: sudo
     ansible_python_interpreter: /usr/bin/python3
   hosts:
-    docker:
-      ansible_host: 10.111.11.20
+    ubuntu:
+      ansible_host: 10.1.2.16

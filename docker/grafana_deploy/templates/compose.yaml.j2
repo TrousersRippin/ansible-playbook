@@ -10,15 +10,17 @@ services:
     environment:
       - TZ=Europe/Stockholm
     volumes:
-      - /opt/stacks/{{ APP }}/config/{{ APP }}.ini:/etc/{{ APP }}/{{ APP }}.ini:rw
-      - /opt/stacks/{{ APP }}/dashboards:/etc/{{ APP }}/dashboards:ro
-      - /opt/stacks/{{ APP }}/data:/var/lib/{{ APP }}:rw
-      - /opt/stacks/{{ APP }}/provisioning:/etc/{{ APP }}/provisioning:ro
+      - /opt/stacks/{{ APP }}/config:/etc/{{ APP }}:ro
+      - {{ APP }}-data:/var/lib/{{ APP }}:rw
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
-    user: "{{ user_uid }}:{{ user_gid }}"
     networks:
       - {{ NETWORK }}
+
+volumes:
+  {{ APP }}-data:
+    name: {{ APP }}-data
+    external: true
 
 networks:
   {{ NETWORK }}:

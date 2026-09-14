@@ -18,17 +18,9 @@
     owner: "{{ USER }}"
     group: "{{ USER }}"
 
-- name: Create a directory for container data storage
-  ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/data"
-    state: directory
-    mode: '0755'
-    owner: "{{ USER }}"
-    group: "{{ USER }}"
-
 - name: Create a directory for container dashboard storage
   ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/dashboards"
+    path: "/opt/stacks/{{ APP }}/config/dashboards"
     state: directory
     mode: '0755'
     owner: "{{ USER }}"
@@ -36,7 +28,7 @@
 
 - name: Create a directory for container provisioning storage
   ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/provisioning"
+    path: "/opt/stacks/{{ APP }}/config/provisioning"
     state: directory
     mode: '0755'
     owner: "{{ USER }}"
@@ -44,7 +36,7 @@
 
 - name: Create a directory for container provisioning-alerting storage
   ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/provisioning/alerting"
+    path: "/opt/stacks/{{ APP }}/config/provisioning/alerting"
     state: directory
     mode: '0755'
     owner: "{{ USER }}"
@@ -52,7 +44,7 @@
 
 - name: Create a directory for container provisioning-dashboards storage
   ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/provisioning/dashboards"
+    path: "/opt/stacks/{{ APP }}/config/provisioning/dashboards"
     state: directory
     mode: '0755'
     owner: "{{ USER }}"
@@ -60,7 +52,7 @@
 
 - name: Create a directory for container provisioning-datasources storage
   ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/provisioning/datasources"
+    path: "/opt/stacks/{{ APP }}/config/provisioning/datasources"
     state: directory
     mode: '0755'
     owner: "{{ USER }}"
@@ -68,24 +60,16 @@
 
 - name: Create a directory for container provisioning-plugins storage
   ansible.builtin.file:
-    path: "/opt/stacks/{{ APP }}/provisioning/plugins"
+    path: "/opt/stacks/{{ APP }}/config/provisioning/plugins"
     state: directory
     mode: '0755'
-    owner: "{{ USER }}"
-    group: "{{ USER }}"
-
-- name: Add config file
-  ansible.builtin.copy:
-    src: "files/grafana.ini"
-    dest: "/opt/stacks/{{ APP }}/config/grafana.ini"
-    mode: '0644'
     owner: "{{ USER }}"
     group: "{{ USER }}"
 
 - name: Add dashboards config file
   ansible.builtin.copy:
     src: "files/dashboards.yaml"
-    dest: "/opt/stacks/{{ APP }}/provisioning/dashboards/dashboards.yaml"
+    dest: "/opt/stacks/{{ APP }}/config/provisioning/dashboards/dashboards.yaml"
     mode: '0644'
     owner: "{{ USER }}"
     group: "{{ USER }}"
@@ -93,7 +77,7 @@
 - name: Add datasources config file
   ansible.builtin.copy:
     src: "files/datasources.yaml"
-    dest: "/opt/stacks/{{ APP }}/provisioning/datasources/datasources.yaml"
+    dest: "/opt/stacks/{{ APP }}/config/provisioning/datasources/datasources.yaml"
     mode: '0644'
     owner: "{{ USER }}"
     group: "{{ USER }}"
@@ -101,7 +85,7 @@
 - name: Add docker dashboard file
   ansible.builtin.copy:
     src: "files/docker.json"
-    dest: "/opt/stacks/{{ APP }}/dashboards/docker.json"
+    dest: "/opt/stacks/{{ APP }}/config/dashboards/docker.json"
     mode: '0644'
     owner: "{{ USER }}"
     group: "{{ USER }}"
@@ -109,7 +93,7 @@
 - name: Add node-exporter dashboard file
   ansible.builtin.copy:
     src: "files/node-exporter.json"
-    dest: "/opt/stacks/{{ APP }}/dashboards/node-exporter.json"
+    dest: "/opt/stacks/{{ APP }}/config/dashboards/node-exporter.json"
     mode: '0644'
     owner: "{{ USER }}"
     group: "{{ USER }}"
@@ -123,6 +107,11 @@
   ansible.builtin.set_fact:
     user_uid: "{{ grafana_user_info.stdout.split(':')[2] }}"
     user_gid: "{{ grafana_user_info.stdout.split(':')[3] }}"
+
+- name: Ensure the {{ APP }}-data named volume exists
+  community.docker.docker_volume:
+    name: "{{ APP }}-data"
+    state: present
 
 - name: Create a directory for compose file
   ansible.builtin.file:

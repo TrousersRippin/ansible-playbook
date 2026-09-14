@@ -22,6 +22,15 @@
     owner: "{{ USER }}"
     group: "{{ USER }}"
 
+- name: Get Docker group GID
+  command: getent group docker
+  register: docker_group
+  changed_when: false
+
+- name: Set docker_gid fact
+  set_fact:
+    docker_gid: "{{ docker_group.stdout.split(':')[2] }}"
+
 - name: Create a directory for compose file
   ansible.builtin.file:
     path: "/opt/stacks/compose/{{ APP }}"

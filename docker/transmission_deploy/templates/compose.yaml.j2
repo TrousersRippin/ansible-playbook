@@ -15,9 +15,9 @@ services:
       - /opt/stacks/{{ APP }}/config:/config:rw
       - /opt/stacks/{{ APP }}/config:/watch:rw
     ports:
+      - {{ PORT_NUMBER }}:{{ DEFAULT_PORT_NUMBER }}/tcp
       - {{ PORT_NUMBER1 }}:{{ PORT_NUMBER1 }}/tcp
-      - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/tcp
-      - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/udp
+      - {{ PORT_NUMBER1 }}:{{ PORT_NUMBER1 }}/udp
     networks:
       - {{ NETWORK }}
 

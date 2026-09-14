@@ -12,12 +12,12 @@ services:
       - /opt/stacks/{{ APP }}/data:/data:rw
       - /opt/stacks:/opt/stacks:rw
       - /tmp:/backups:rw
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     healthcheck:
       disable: true
-    group_add: [987]
+    group_add: [{{ docker_gid }}]
     networks:
       - {{ NETWORK }}
 

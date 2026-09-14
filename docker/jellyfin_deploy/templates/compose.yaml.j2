@@ -12,12 +12,11 @@ services:
     volumes:
       - /opt/stacks/{{ APP }}/cache:/cache:rw
       - /opt/stacks/{{ APP }}/config:/config:rw
-      - /etc/localtime:/etc/localtime:ro
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     healthcheck:
       disable: true
-    user: ${UID:-1000}:${GID:-1000}
+    user: 1000:1000
     networks:
       - {{ NETWORK }}
 
