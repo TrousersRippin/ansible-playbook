@@ -98,6 +98,14 @@
     owner: "{{ USER }}"
     group: "{{ USER }}"
 
+- name: Add grafana.ini config file
+  ansible.builtin.copy:
+    src: "files/grafana.ini"
+    dest: "/opt/stacks/{{ APP }}/config/grafana.ini"
+    mode: '0644'
+    owner: "{{ USER }}"
+    group: "{{ USER }}"
+
 - name: Get target user UID/GID
   ansible.builtin.command: getent passwd "{{ USER }}"
   register: grafana_user_info
