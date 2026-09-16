@@ -14,11 +14,11 @@
 
 ---
 - name: Install Docker Homelab
-  hosts: virtual_machines
+  hosts: all
   become: true
   roles:
     - docker_install
-    - alloy_deploy
+    # - alloy_deploy
     # - arcane_deploy
     # - audiobookshelf_deploy
     # - bazarr_deploy
@@ -27,24 +27,24 @@
     # - gatus_deploy
     # - ghost_deploy
     # - gotify_deploy
-    - grafana_deploy
+    # - grafana_deploy
     # - homepage_deploy
     # - jellyfin_deploy
     # - jellystat_deploy
-    - loki_deploy
+    # - loki_deploy
     # - memos_deploy
     # - mkvtoolnix_deploy
     # - myspeed_deploy
     # - photoprism_deploy
     # - plex_deploy
     # - postgres_deploy
-    - prometheus_deploy
+    # - prometheus_deploy
     # - prowlarr_deploy
     # - radarr_deploy
     # - seerr_deploy
     # - sonarr_deploy
     # - tautulli_deploy
     # - technitium_deploy
-    - telegraf_deploy
+    # - telegraf_deploy
     # - transmission_deploy
     # - vaultwarden_deploy

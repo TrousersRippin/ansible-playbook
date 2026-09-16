@@ -5,13 +5,13 @@ all:
     ansible_become: true
     ansible_become_method: sudo
     ansible_python_interpreter: /usr/bin/python3
-bare_metal:
+servers:
   hosts:
     zimacube:
       ansible_host: 10.1.1.11
     beelink:
       ansible_host: 10.1.2.14
-#virtual_machines:
+#kubernetes:
   #hosts:
     #k3s-01:
     #  ansible_host: 10.1.2.61
@@ -19,9 +19,19 @@ bare_metal:
     #  ansible_host: 10.1.2.62
     #k3s-03:
     #  ansible_host: 10.1.2.63
+    #k3s-04:
+    #  ansible_host: 10.1.2.64
+    #k3s-05:
+    #  ansible_host: 10.1.2.65
+#hashicorp:
+  #hosts:
     #hashicorp-01:
     #  ansible_host: 10.1.2.71
     #hashicorp-02:
     #  ansible_host: 10.1.2.72
     #hashicorp-03:
     #  ansible_host: 10.1.2.73
+    #hashicorp-04:
+    #  ansible_host: 10.1.2.74
+    #hashicorp-05:
+    #  ansible_host: 10.1.2.75
