@@ -28,6 +28,9 @@ services:
       - /var/log:/var/log:ro
       - /var/log/journal:/var/log/journal:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+{% for mount in APP_LOG_MOUNTS | default([]) %}
+      - "{{ mount }}"
+{% endfor %}
     ports:
       - {{ PORT_NUMBER1 }}:{{ PORT_NUMBER1 }}/tcp
       - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/udp

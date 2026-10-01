@@ -7,3 +7,6 @@ NETWORK: proxy
 PORT_NUMBER1: 12345
 PORT_NUMBER2: 5514
 USER: troy
+APP_LOG_MOUNTS:
+  - "/opt/stacks/plex/Library/Application Support/Plex Media Server/Logs:/logs/plex:ro"
+  - "/opt/stacks/technitium/logs:/logs/technitium:ro"

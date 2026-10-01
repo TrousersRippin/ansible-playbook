@@ -22,6 +22,14 @@
     owner: "{{ USER }}"
     group: "{{ USER }}"
 
+- name: Create a directory for container log storage
+  ansible.builtin.file:
+    path: "/opt/stacks/{{ APP }}/logs"
+    state: directory
+    mode: '0755'
+    owner: "{{ USER }}"
+    group: "{{ USER }}"
+
 - name: Create a directory for compose file
   ansible.builtin.file:
     path: "/opt/stacks/compose/{{ APP }}"

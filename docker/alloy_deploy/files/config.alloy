@@ -89,7 +89,7 @@ loki.process "docker_json" {
 		values = {
 			log_source = "docker",
 			log_type   = "container",
-			host       = env("ALLOY_HOSTNAME"),
+			host       = sys.env("ALLOY_HOSTNAME"),
 		}
 	}
 }
@@ -140,7 +140,7 @@ loki.source.journal "systemd_journal" {
 	max_age       = "4h0m0s"
 	relabel_rules = discovery.relabel.systemd_journal.rules
 	forward_to    = [loki.write.default.receiver]
-	labels        = {"log_source" = "systemd", "log_type" = "journal", "host" = env("ALLOY_HOSTNAME")}
+	labels        = {"log_source" = "systemd", "log_type" = "journal", "host" = sys.env("ALLOY_HOSTNAME")}
 	path          = "/var/log/journal"
 }
 
@@ -149,11 +149,11 @@ local.file_match "apt_logs" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/apt/{history,term}.log",
-		instance    = env("ALLOY_HOSTNAME"),
+		instance    = sys.env("ALLOY_HOSTNAME"),
 		job         = "apt-package-manager",
 		log_source  = "apt",
 		log_type    = "package-management",
-		host        = env("ALLOY_HOSTNAME"),
+		host        = sys.env("ALLOY_HOSTNAME"),
 	}]
 }
 
@@ -167,11 +167,11 @@ local.file_match "fail2ban_logs" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/fail2ban.log",
-		instance    = env("ALLOY_HOSTNAME"),
+		instance    = sys.env("ALLOY_HOSTNAME"),
 		job         = "fail2ban-security",
 		log_source  = "fail2ban",
 		log_type    = "security",
-		host        = env("ALLOY_HOSTNAME"),
+		host        = sys.env("ALLOY_HOSTNAME"),
 	}]
 }
 
@@ -185,12 +185,12 @@ local.file_match "unattended_upgrades_logs" {
 	path_targets = [{
 		__address__ = "localhost",
 		__path__    = "/var/log/unattended-upgrades/unattended-upgrades*.log",
-		instance    = env("ALLOY_HOSTNAME"),
+		instance    = sys.env("ALLOY_HOSTNAME"),
 		job         = "unattended-upgrades",
 		log_source  = "unattended-upgrades",
 		log_type    = "package-management",
 		category    = "auto-updates",
-		host        = env("ALLOY_HOSTNAME"),
+		host        = sys.env("ALLOY_HOSTNAME"),
 	}]
 }
 
@@ -199,12 +199,120 @@ loki.source.file "unattended_upgrades_logs" {
 	forward_to = [loki.write.default.receiver]
 }
 
+/* Plex Media Server Logs */
+local.file_match "plex_logs" {
+	path_targets = [{
+		__address__    = "localhost",
+		__path__       = "/logs/plex/{Plex Media Server,Plex Media Scanner Analysis,Plex Media Scanner Matcher}.log",
+		job            = "plex",
+		container_name = "plex",
+		log_source     = "plex",
+		log_type       = "application",
+		host           = sys.env("ALLOY_HOSTNAME"),
+	}]
+}
+
+loki.source.file "plex_logs" {
+	targets    = local.file_match.plex_logs.targets
+	forward_to = [loki.process.plex.receiver]
+}
+
+loki.process "plex" {
+	forward_to = [loki.write.default.receiver]
+
+	// Example: Oct 01, 2026 12:34:56.789 [140234567] INFO - Message
+	stage.regex {
+		expression = `^(?P<ts>[A-Z][a-z]{2} \d{1,2}, \d{4} \d{2}:\d{2}:\d{2}\.\d{3}) \[[^\]]+\] (?P<level>[A-Z]+) - `
+	}
+
+	stage.timestamp {
+		source   = "ts"
+		format   = "Jan 2, 2006 15:04:05.000"
+		location = "Europe/Stockholm"
+	}
+
+	stage.labels {
+		values = { level = "" }
+	}
+
+	// Plex logs at DEBUG by default; remove this stage to keep DEBUG lines
+	stage.drop {
+		source              = "level"
+		value               = "DEBUG"
+		drop_counter_reason = "plex_debug"
+	}
+
+	// Loki rejects entries older than 7 days
+	stage.drop {
+		older_than          = "167h"
+		drop_counter_reason = "too_old"
+	}
+}
+
+/* Technitium DNS Server Logs */
+local.file_match "technitium_logs" {
+	path_targets = [{
+		__address__    = "localhost",
+		__path__       = "/logs/technitium/*.log",
+		job            = "technitium",
+		container_name = "technitium",
+		log_source     = "technitium",
+		log_type       = "application",
+		host           = sys.env("ALLOY_HOSTNAME"),
+	}]
+}
+
+loki.source.file "technitium_logs" {
+	targets    = local.file_match.technitium_logs.targets
+	forward_to = [loki.process.technitium.receiver]
+}
+
+loki.process "technitium" {
+	forward_to = [loki.write.default.receiver]
+
+	// Join stack traces onto the line that starts with a timestamp
+	stage.multiline {
+		firstline     = `^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} `
+		max_wait_time = "3s"
+	}
+
+	// Example: [2026-10-01 12:34:56 UTC] Message  (or "Local" when local time is enabled)
+	stage.regex {
+		expression = `^\[(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?:UTC|Local)\]`
+	}
+
+	stage.match {
+		selector = `{job="technitium"} |= " UTC]"`
+
+		stage.timestamp {
+			source = "ts"
+			format = "2006-01-02 15:04:05"
+		}
+	}
+
+	stage.match {
+		selector = `{job="technitium"} |= " Local]"`
+
+		stage.timestamp {
+			source   = "ts"
+			format   = "2006-01-02 15:04:05"
+			location = "Europe/Stockholm"
+		}
+	}
+
+	// Loki rejects entries older than 7 days
+	stage.drop {
+		older_than          = "167h"
+		drop_counter_reason = "too_old"
+	}
+}
+
 /* System (Node) Metrics */
 discovery.relabel "metrics" {
 	targets = prometheus.exporter.unix.metrics.targets
 	rule {
 		target_label = "instance"
-		replacement  = env("ALLOY_HOSTNAME")
+		replacement  = sys.env("ALLOY_HOSTNAME")
 	}
 	rule {
 		target_label = "job"

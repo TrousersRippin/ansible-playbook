@@ -10,6 +10,7 @@ services:
     env_file: .env
     volumes:
       - /opt/stacks/{{ APP }}/config:/etc/dns:rw
+      - /opt/stacks/{{ APP }}/logs:/var/log/technitium/dns:rw
     ports:
       - {{ PORT_NUMBER1 }}:{{ PORT_NUMBER1 }}/tcp
       - {{ PORT_NUMBER2 }}:{{ PORT_NUMBER2 }}/tcp
