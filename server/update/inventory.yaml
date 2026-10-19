@@ -11,6 +11,8 @@ servers:
       ansible_host: 10.1.1.11
     beelink:
       ansible_host: 10.1.2.14
+    ubuntu:
+      ansible_host: 10.1.1.13
 #kubernetes:
   #hosts:
     #k3s-01:
@@ -23,15 +25,3 @@ servers:
     #  ansible_host: 10.1.2.64
     #k3s-05:
     #  ansible_host: 10.1.2.65
-#hashicorp:
-  #hosts:
-    #hashicorp-01:
-    #  ansible_host: 10.1.2.71
-    #hashicorp-02:
-    #  ansible_host: 10.1.2.72
-    #hashicorp-03:
-    #  ansible_host: 10.1.2.73
-    #hashicorp-04:
-    #  ansible_host: 10.1.2.74
-    #hashicorp-05:
-    #  ansible_host: 10.1.2.75

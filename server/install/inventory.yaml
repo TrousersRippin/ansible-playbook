@@ -13,5 +13,5 @@ bare_metal:
       ansible_host: 10.1.2.14
 virtual_machines:
   hosts:
-    ansible:
-      ansible_host: 10.1.2.51
+    ubuntu:
+      ansible_host: 10.1.1.13
