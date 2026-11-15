@@ -9,9 +9,19 @@
   ansible.builtin.package:
     name:
       - docker.io
-      - docker-compose
+      # Ubuntu's "docker-compose" package is the legacy v1 (Python) binary; the
+      # community.docker.docker_compose_v2 module needs the "docker compose" CLI plugin.
+      - "{{ 'docker-compose-v2' if ansible_facts.distribution == 'Ubuntu' else 'docker-compose' }}"
     state: present
     update_cache: true
+
+- name: Check Docker Compose v2 plugin
+  ansible.builtin.command: docker compose version --short
+  register: docker_compose_version
+  changed_when: false
+  failed_when: >-
+    docker_compose_version.rc != 0 or
+    docker_compose_version.stdout is version('2.18.0', '<')
 
 - name: Reload systemd daemon
   ansible.builtin.systemd:
@@ -61,7 +71,7 @@
 
 - name: Show installed Docker version
   ansible.builtin.debug:
-    msg: "Docker version: {{ docker_version.stdout }}"
+    msg: "Docker version: {{ docker_version.stdout }}, Compose: {{ docker_compose_version.stdout }}"
 
 - name: Restart getty service to prevent respawn loop
   ansible.builtin.systemd:
