@@ -7,12 +7,10 @@ all:
     ansible_python_interpreter: /usr/bin/python3
 servers:
   hosts:
-    zimacube:
-      ansible_host: 10.1.1.11
-    beelink:
-      ansible_host: 10.1.2.14
+#    zimacube:
+#      ansible_host: 10.1.1.11
     ubuntu:
-      ansible_host: 10.1.1.13
+      ansible_host: 10.1.1.23
 #kubernetes:
   #hosts:
     #k3s-01:

@@ -7,4 +7,3 @@
       | list
       | first
       | default('No upgrade output available') }}
-  listen: Apt upgrade summary

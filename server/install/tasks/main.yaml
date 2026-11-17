@@ -1,10 +1,4 @@
 ---
-- name: Create Ansible remote_tmp directory
-  ansible.builtin.file:
-    path: /root/.cache/ansible/tmp
-    state: directory
-    mode: '0700'
-
 # =============================================================================
 # Environment detection
 # =============================================================================
@@ -30,7 +24,11 @@
     mode: '0644'
     content: |
       127.0.0.1   localhost
-      127.0.1.1   {{ inventory_hostname }}   {{ inventory_hostname }}
+      127.0.1.1   {{ inventory_hostname }}.{{ DOMAIN }}   {{ inventory_hostname }}
+
+      ::1         localhost ip6-localhost ip6-loopback
+      ff02::1     ip6-allnodes
+      ff02::2     ip6-allrouters
 
 # =============================================================================
 # Package manager
@@ -107,30 +105,77 @@
     name: "{{ TIMEZONE }}"
 
 # =============================================================================
+# Packages
+# =============================================================================
+# Installed before the User section so /bin/zsh exists before it is set as
+# the new user's login shell.
+- name: Install packages
+  ansible.builtin.apt:
+    name:
+      - console-setup
+      - curl
+      - git
+      - gpg
+      - tree
+      - vim
+      - wget
+      - zsh
+    state: present
+
+- name: Install security packages
+  ansible.builtin.apt:
+    name:
+      - fail2ban
+      - python3-systemd
+      - unattended-upgrades
+      # - ufw
+    state: present
+
+# =============================================================================
 # User
 # =============================================================================
-- name: Generate password hash
+# uid/gid 1000 are only requested when free (or already owned by the new
+# user), so images with a pre-existing uid-1000 account (e.g. cloud images'
+# default "ubuntu" user) don't fail here.
+- name: Look up current owner of uid 1000
+  ansible.builtin.command: getent passwd 1000
+  register: uid_1000
+  changed_when: false
+  failed_when: uid_1000.rc not in [0, 2]
+
+- name: Look up current owner of gid 1000
+  ansible.builtin.command: getent group 1000
+  register: gid_1000
+  changed_when: false
+  failed_when: gid_1000.rc not in [0, 2]
+
+- name: Decide whether uid/gid 1000 can be used
   ansible.builtin.set_fact:
-    hashed_password: "{{ NEW_USER_PASSWORD | password_hash('sha512') }}"
+    use_uid_1000: "{{ uid_1000.rc == 2 or uid_1000.stdout.split(':')[0] == NEW_USER_NAME }}"
+    use_gid_1000: "{{ gid_1000.rc == 2 or gid_1000.stdout.split(':')[0] == NEW_USER_NAME }}"
 
 - name: Create group for new user
   ansible.builtin.group:
     name: "{{ NEW_USER_NAME }}"
-    gid: 1000
+    gid: "{{ 1000 if use_gid_1000 | bool else omit }}"
     state: present
 
+# update_password: on_create — password_hash() uses a random salt, so without
+# this every run would report "changed" and rewrite the hash. Change the
+# password on an existing host with `passwd` (or temporarily set "always").
 - name: Add user
   ansible.builtin.user:
     name: "{{ NEW_USER_NAME }}"
     comment: "{{ NEW_USER_FULLNAME }}"
-    uid: 1000
+    uid: "{{ 1000 if use_uid_1000 | bool else omit }}"
     group: "{{ NEW_USER_NAME }}"
     shell: /bin/zsh
     create_home: true
     state: present
     groups: sudo
     append: true
-    password: "{{ hashed_password }}"
+    password: "{{ NEW_USER_PASSWORD | password_hash('sha512') }}"
+    update_password: on_create
 
 # - name: Configure sudo privileges
 #  ansible.builtin.copy:
@@ -145,18 +190,6 @@
 # =============================================================================
 # SSH
 # =============================================================================
-- name: Create SSH directory for root user
-  ansible.builtin.file:
-    path: /root/.ssh
-    state: directory
-    mode: '0700'
-
-- name: Add SSH key to root user's authorized_keys
-  ansible.builtin.authorized_key:
-    user: root
-    key: "{{ lookup('file', SSH_KEY_PATH) }}"
-    state: present
-
 - name: Create .ssh directory for new user
   ansible.builtin.file:
     path: /home/{{ NEW_USER_NAME }}/.ssh
@@ -208,31 +241,8 @@
       PermitRootLogin no
       PubkeyAuthentication yes
       PasswordAuthentication no
+    validate: /usr/sbin/sshd -t -f %s
   notify: Restart ssh
-
-# =============================================================================
-# Packages
-# =============================================================================
-- name: Install packages
-  ansible.builtin.apt:
-    name:
-      - console-setup
-      - curl
-      - git
-      - gpg
-      - tree
-      - vim
-      - wget
-      - zsh
-    state: present
-
-- name: Install security packages
-  ansible.builtin.apt:
-    name:
-      - fail2ban
-      - unattended-upgrades
-      # - ufw
-    state: present
 
 # =============================================================================
 # Fail2ban
@@ -256,8 +266,11 @@
 
       [sshd]
       enabled = true
-      backend = auto
+      # Read from the journal: journald has ForwardToSyslog=no, so
+      # /var/log/auth.log is not written (and Debian 12+ has no rsyslog).
+      backend = systemd
   when: not is_lxc
+  notify: Restart fail2ban
 
 - name: Start and enable fail2ban
   ansible.builtin.service:
@@ -298,7 +311,6 @@
     content: |
       Unattended-Upgrade::Origins-Pattern {
           "origin=Debian,codename=${distro_codename}-updates";
-          "origin=Debian,codename=${distro_codename}-proposed-updates";
           "origin=Debian,codename=${distro_codename},label=Debian";
           "origin=Debian,codename=${distro_codename},label=Debian-Security";
           "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
@@ -342,6 +354,14 @@
 # =============================================================================
 # systemd-resolved
 # =============================================================================
+# Debian 12+ ships systemd-resolved as a separate package; Ubuntu has it in
+# the base system.
+- name: Install systemd-resolved (Debian)
+  ansible.builtin.apt:
+    name: systemd-resolved
+    state: present
+  when: ansible_distribution == 'Debian'
+
 - name: Create systemd-resolved config directory
   ansible.builtin.file:
     path: /etc/systemd/resolved.conf.d
@@ -409,13 +429,8 @@
       ForwardToKMsg=no
       ForwardToSyslog=no
       Seal=yes
-      MaxMessageSize=64K
+      LineMax=64K
       SyncIntervalSec=5m
-
-- name: Enable systemd-journald
-  ansible.builtin.service:
-    name: systemd-journald
-    enabled: true
 
 # =============================================================================
 # Kernel parameters
@@ -429,7 +444,6 @@
     mode: '0644'
     content: |
       kernel.printk=1 4 1 4
-  failed_when: false
   when: not is_lxc
 
 - name: Create systemd system.conf.d directory
@@ -445,14 +459,14 @@
     content: |
       [Manager]
       LogTarget=journal
-      LogLevel=emerg
+      LogLevel=warning
 
 # =============================================================================
 # Console
 # =============================================================================
-# NOTE: these target a real virtual console (/dev/tty0, framebuffer) that
-# doesn't exist in an LXC container. Harmless to run, but a no-op, so
-# skipping to save time/noise.
+# NOTE: /etc/issue, keyboard layout and console font only affect a real
+# virtual console (/dev/tty*, framebuffer), which an LXC container doesn't
+# have. They'd be harmless no-ops there, so they're skipped on LXC.
 - name: Configure /etc/issue
   vars:
     os_color: "{{ '33' if ansible_distribution == 'Ubuntu' else '32' }}"

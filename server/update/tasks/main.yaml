@@ -8,10 +8,11 @@
   ansible.builtin.apt:
     upgrade: dist
   register: apt_upgrade_result
+  notify: Apt upgrade summary
 
 - name: Display upgraded packages
   vars:
-    upgraded_pkgs: "{{ apt_upgrade_result.stdout_lines | select('match', '^Inst ') | map('regex_replace', '^Inst (\\S+).*', '\\1') | join(', ') }}"
+    upgraded_pkgs: "{{ apt_upgrade_result.stdout_lines | select('match', '^Setting up ') | map('regex_replace', '^Setting up (\\S+) .*', '\\1') | unique | join(', ') }}"
   ansible.builtin.debug:
     msg: "Packages upgraded on {{ inventory_hostname }}: {{ upgraded_pkgs }}"
   when: apt_upgrade_result.changed

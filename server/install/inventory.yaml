@@ -5,13 +5,13 @@ all:
     ansible_become: true
     ansible_become_method: sudo
     ansible_python_interpreter: /usr/bin/python3
-bare_metal:
-  hosts:
-    zimacube:
-      ansible_host: 10.1.1.11
-    beelink:
-      ansible_host: 10.1.2.14
+#bare_metal:
+#  hosts:
+#    zimacube:
+#      ansible_host: 10.1.1.11
+#    beelink:
+#      ansible_host: 10.1.2.14
 virtual_machines:
   hosts:
     ubuntu:
-      ansible_host: 10.1.1.13
+      ansible_host: 10.1.1.23
