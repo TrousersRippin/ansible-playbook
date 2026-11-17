@@ -1,8 +1,13 @@
 ---
-server:
+# FileBrowser Quantum v2.x layout
+http:
   port: 8005
-  database: "data/filebrowser.sqlite"
-  cacheDir: "data/tmp"
+
+server:
+  # Relative paths resolve from /home/filebrowser, so keep these absolute
+  database:
+    path: "/home/filebrowser/data/database.sqlite"
+  cacheDir: "/home/filebrowser/data/tmp"
   sources:
     - path: "/mnt/home-troy"
       name: Home
@@ -12,11 +17,15 @@ server:
       name: Opt
       config:
         defaultEnabled: true
+    - path: "/mnt/host-mnt"
+      name: Mnt
+      config:
+        defaultEnabled: true
 
 auth:
-  tokenExpirationHours: 2
   methods:
     password:
       enabled: true
       minLength: 8
-  adminUsername: admin
+      # Admin user defaults to "admin"; password comes from
+      # FILEBROWSER_ADMIN_PASSWORD in .env (vault)

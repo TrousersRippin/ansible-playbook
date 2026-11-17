@@ -5,14 +5,13 @@ services:
     container_name: {{ APP }}
     hostname: {{ APP }}
     restart: unless-stopped
+    init: true
     security_opt:
       - no-new-privileges:true
     environment:
       - TZ=Europe/Stockholm
-      - PUID=1000
-      - PGID=1000
     volumes:
-      - /opt/stacks/{{ APP }}/config:/config:rw
+      - /opt/stacks/{{ APP }}/config:/app/config:rw
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
     networks:

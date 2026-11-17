@@ -54,6 +54,14 @@
     owner: "{{ USER }}"
     group: "{{ USER }}"
 
+# Pull before touching systemd-resolved, while host DNS still works
+- name: Check if image exists
+  community.docker.docker_image:
+    name: "{{ IMAGE_NAME }}"
+    tag: "{{ IMAGE_TAG }}"
+    source: pull
+
+# Frees port 53 for the container
 - name: Ensure DNSStubListener=no is set
   ansible.builtin.lineinfile:
     path: /etc/systemd/resolved.conf
@@ -61,18 +69,20 @@
     line: 'DNSStubListener=no'
     create: true
     backup: true
+  notify: Restart systemd-resolved
 
-- name: Restart systemd-resolved
-  ansible.builtin.systemd:
-    name: systemd-resolved
-    state: restarted
-    enabled: true
+# Default stub-resolv.conf points at 127.0.0.53, which stops answering once the
+# stub listener is off; use the upstream servers resolved learned instead
+- name: Point /etc/resolv.conf at systemd-resolved upstream servers
+  ansible.builtin.file:
+    src: /run/systemd/resolve/resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+    force: true
+  notify: Restart systemd-resolved
 
-- name: Check if image exists
-  community.docker.docker_image:
-    name: "{{ IMAGE_NAME }}"
-    tag: "{{ IMAGE_TAG }}"
-    source: pull
+- name: Apply systemd-resolved changes before binding port 53
+  ansible.builtin.meta: flush_handlers
 
 - name: Start container
   community.docker.docker_compose_v2:

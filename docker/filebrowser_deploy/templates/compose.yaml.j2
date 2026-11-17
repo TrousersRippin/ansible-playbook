@@ -12,6 +12,7 @@ services:
       - /opt/stacks/{{ APP }}/config:/home/{{ APP }}/config:rw
       - /opt/stacks/{{ APP }}/data:/home/{{ APP }}/data:rw
       - /home/troy:/mnt/home-troy:rw
+      - /mnt:/mnt/host-mnt:rw
       - /opt/stacks:/mnt/host-opt:rw
     ports:
       - {{ PORT_NUMBER }}:{{ PORT_NUMBER }}/tcp
